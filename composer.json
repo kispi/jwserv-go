@@ -1,0 +1,22 @@
+{
+  "name": "jwserv/api",
+  "description": "jwserv API Version.",
+  "type": "product",
+  "require": {
+    "php": ">=5.5.9",
+    "robmorgan/phinx": "0.5.*",
+    "vlucas/phpdotenv": "~2.0"
+  },
+  "require-dev": {
+    "fzaninotto/faker": "~1.4"
+  },
+  "scripts": {
+    "post-install-cmd": [
+      ""
+    ]
+  },
+  "config": {
+    "preferred-install": "dist",
+    "secure-http": false
+  }
+}
