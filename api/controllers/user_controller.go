@@ -21,5 +21,5 @@ func (c *UserController) Get() {
 	}
 	qs.All(&records)
 
-	c.Success(1, records)
+	c.Success(int64(len(records)), records)
 }
