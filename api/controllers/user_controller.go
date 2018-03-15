@@ -11,15 +11,15 @@ type UserController struct {
 
 // Get Get
 func (c *UserController) Get() {
-	records := []*models.ServiceRecord{}
-	qs := models.GetModelQuerySeter(new(models.ServiceRecord), true)
+	users := []*models.User{}
+	qs := models.GetModelQuerySeter(new(models.User), true)
 	var err error
 	qs, err = c.SetQuerySeterByURIParam(qs)
 	if err != nil {
 		c.Failed(err)
 		return
 	}
-	qs.All(&records)
+	qs.All(&users)
 
-	c.Success(int64(len(records)), records)
+	c.Success(int64(len(users)), users)
 }
