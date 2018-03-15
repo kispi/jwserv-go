@@ -44,9 +44,14 @@ func setDB() {
 	Port = os.Getenv("DB_PORT")
 }
 
+func setHTTP() {
+	beego.BConfig.CopyRequestBody = true
+}
+
 func init() {
 	loadEnvFile("../.env")
 	setDB()
+	setHTTP()
 	orm.RegisterDriver("mysql", orm.DRMySQL)
 	orm.RegisterDataBase("default", "mysql", User+":"+Pass+"@tcp("+Host+":"+Port+")/"+Name+"?charset=utf8mb4&sql_mode=TRADITIONAL")
 }

@@ -23,3 +23,15 @@ func (c *CongregationController) Get() {
 
 	c.Success(int64(len(congregations)), congregations)
 }
+
+// Put Put
+func (c *CongregationController) Put() {
+	congregation := new(models.Congregation)
+	err := c.ParseJSONBodyStruct(congregation)
+	if err != nil {
+		c.Failed(err)
+		return
+	}
+
+	c.Success(1, congregation)
+}

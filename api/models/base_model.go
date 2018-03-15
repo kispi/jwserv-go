@@ -1,9 +1,13 @@
 package models
 
 import (
+	"errors"
+	"fmt"
+	"reflect"
 	"time"
 
 	"github.com/astaxie/beego/orm"
+	"github.com/davecgh/go-spew/spew"
 )
 
 // BaseModel BaseModel
@@ -24,12 +28,52 @@ func (m *BaseModel) TableName() string {
 	return "default_table"
 }
 
-// Insert wrapper of NewOrm().Insert()
-func Insert(obj interface{}) {
+// InsertModel wrapper of NewOrm().Insert()
+func InsertModel(obj interface{}) (id int64, err error) {
 	o := orm.NewOrm()
-	o.Using("default")
+	id, err = o.Insert(obj)
 
-	o.Insert(obj)
+	if err == nil {
+		st := reflect.ValueOf(obj).Elem()
+		idField := st.FieldByName("Id")
+		idField.SetInt(id)
+	}
+	return
+}
+
+// UpdateModel wrapper of NewOrm().Update()
+func UpdateModel(obj interface{}, keys []string) (num int64, err error) {
+	o := orm.NewOrm()
+	num, err = o.Update(obj, keys...)
+
+	if err != nil {
+		err = errors.New(fmt.Sprintf("UpdateModel error %d %v [%s]", spew.Sdump(obj), keys, err.Error()))
+	}
+	return
+}
+
+// SoftDeleteModel mark deleted_at instead of really deletes it.
+func SoftDeleteModel(m interface{}) (err error) {
+	field := reflect.ValueOf(m).Elem().FieldByName("DeleteAt")
+	if field.IsValid() {
+		now := time.Now()
+		if field.Kind() == reflect.Ptr {
+			field.Set(reflect.ValueOf(&now))
+		} else {
+			field.Set(reflect.ValueOf(now))
+		}
+	}
+	_, err = UpdateModel(m, []string{"deleted_at"})
+	return
+}
+
+// DeleteModel really deletes data.
+func DeleteModel(m interface{}) (err error) {
+	o := orm.NewOrm()
+	if _, err := o.Delete(m); err != nil {
+		return err
+	}
+	return nil
 }
 
 // GetModelQuerySeter GetModelQuerySeter

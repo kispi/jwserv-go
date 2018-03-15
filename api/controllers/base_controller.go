@@ -1,12 +1,14 @@
 package controllers
 
 import (
+	"encoding/json"
 	"errors"
 	"strconv"
 	"strings"
 
 	"../constants"
 
+	"github.com/asaskevich/govalidator"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
 )
@@ -24,14 +26,28 @@ type Response struct {
 
 // Success Success
 func (c *BaseController) Success(total int64, data interface{}) {
+	c.Ctx.Output.SetStatus(200)
 	c.Data["json"] = Response{total, data}
 	c.ServeJSON()
 }
 
 // Failed Failed
 func (c *BaseController) Failed(err error) {
+	c.Ctx.Output.SetStatus(500)
 	c.Data["json"] = Response{1, err.Error()}
 	c.ServeJSON()
+}
+
+// ParseJSONBodyStruct ParseJSONBodyStruct
+func (c *BaseController) ParseJSONBodyStruct(v interface{}) error {
+	err := json.Unmarshal(c.Ctx.Input.RequestBody, &v)
+	if err != nil {
+		return err
+	}
+	if valid, err := govalidator.ValidateStruct(v); !valid {
+		return errors.New("Invalid request body " + err.Error())
+	}
+	return nil
 }
 
 // SetQuerySeterByURIParam SetQuerySeterByURIParam
