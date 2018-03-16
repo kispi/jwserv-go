@@ -42,9 +42,9 @@ func InsertModel(obj interface{}) (id int64, err error) {
 }
 
 // UpdateModel wrapper of NewOrm().Update()
-func UpdateModel(obj interface{}, keys []string) (num int64, err error) {
+func UpdateModel(obj interface{}, keys []string) (err error) {
 	o := orm.NewOrm()
-	num, err = o.Update(obj, keys...)
+	_, err = o.Update(obj, keys...)
 
 	if err != nil {
 		err = errors.New(fmt.Sprintf("UpdateModel error %d %v [%s]", spew.Sdump(obj), keys, err.Error()))
@@ -63,7 +63,7 @@ func SoftDeleteModel(m interface{}) (err error) {
 			field.Set(reflect.ValueOf(now))
 		}
 	}
-	_, err = UpdateModel(m, []string{"deleted_at"})
+	err = UpdateModel(m, []string{"deleted_at"})
 	return
 }
 

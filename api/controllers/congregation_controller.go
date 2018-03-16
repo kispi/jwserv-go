@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"strconv"
+
 	"../models"
 )
 
@@ -24,6 +26,25 @@ func (c *CongregationController) Get() {
 	c.Success(int64(len(congregations)), congregations)
 }
 
+// GetByID GetByID
+func (c *CongregationController) GetByID() {
+	idStr := c.Ctx.Input.Param(":id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		c.Failed(err)
+		return
+	}
+
+	congregation := new(models.Congregation)
+	err = models.GetModelQuerySeter(new(models.Congregation), true).Filter("id", id).One(congregation)
+	if err != nil {
+		c.Failed(err)
+		return
+	}
+
+	c.Success(1, congregation)
+}
+
 // Put Put
 func (c *CongregationController) Put() {
 	congregation := new(models.Congregation)
@@ -33,5 +54,11 @@ func (c *CongregationController) Put() {
 		return
 	}
 
-	c.Success(1, congregation)
+	err = c.PutModel(congregation)
+	if err != nil {
+		c.Failed(err)
+		return
+	}
+
+	c.Success(1, "true")
 }

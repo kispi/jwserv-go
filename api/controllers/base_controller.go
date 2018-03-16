@@ -3,10 +3,13 @@ package controllers
 import (
 	"encoding/json"
 	"errors"
+	"reflect"
 	"strconv"
 	"strings"
 
 	"../constants"
+	"../helper"
+	"../models"
 
 	"github.com/asaskevich/govalidator"
 	"github.com/astaxie/beego"
@@ -108,4 +111,50 @@ func parseFilters(qs orm.QuerySeter, filter string) (orm.QuerySeter, error) {
 		qs = qs.Filter(pair[0], pair[1])
 	}
 	return qs, nil
+}
+
+// PutModel PutModel
+func (c *BaseController) PutModel(m interface{}) (err error) {
+	idStr := c.Ctx.Input.Param(":id")
+	if idStr != "" && idStr != "0" {
+		id, _ := strconv.ParseInt(idStr, 10, 64)
+
+		v := reflect.New(reflect.TypeOf(m).Elem())
+		idV := v.Elem().FieldByName("ID")
+		idV.SetInt(id)
+
+		vInt := v.Interface()
+		err = c.ParseJSONBodyStruct(vInt)
+		if err != nil {
+			return err
+		}
+
+		keys := c.GetInputKeys(vInt)
+		err = models.UpdateModel(vInt, keys)
+	} else {
+		err = errors.New("NotFound")
+	}
+	return
+}
+
+// GetInputKeys GetInputKeys
+func (c *BaseController) GetInputKeys(v interface{}) []string {
+	keysCand := helper.GetInputKeys(c.Ctx.Input.RequestBody)
+	keysModels := []string{}
+
+	vType := reflect.TypeOf(v).Elem()
+	for i := 0; i < vType.NumField(); i++ {
+		keyModel := vType.Field(i).Tag.Get("json")
+		keyModelCleanStr := strings.Replace(keyModel, ",omitempty", "", -1)
+		keysModels = append(keysModels, keyModelCleanStr)
+	}
+
+	keysUpdate := []string{}
+	for _, k := range keysCand {
+		if helper.HasElem(keysModels, k) {
+			keysUpdate = append(keysUpdate, k)
+		}
+	}
+
+	return keysUpdate
 }
