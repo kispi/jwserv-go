@@ -11,7 +11,6 @@ import (
 	"../helper"
 	"../models"
 
-	"github.com/asaskevich/govalidator"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
 )
@@ -46,9 +45,6 @@ func (c *BaseController) ParseJSONBodyStruct(v interface{}) error {
 	err := json.Unmarshal(c.Ctx.Input.RequestBody, &v)
 	if err != nil {
 		return err
-	}
-	if valid, err := govalidator.ValidateStruct(v); !valid {
-		return errors.New("Invalid request body " + err.Error())
 	}
 	return nil
 }
@@ -132,7 +128,24 @@ func (c *BaseController) PutModel(m interface{}) (err error) {
 		keys := c.GetInputKeys(vInt)
 		err = models.UpdateModel(vInt, keys)
 	} else {
-		err = errors.New("NotFound")
+		err = errors.New("URL parameter /:id is not given")
+	}
+	return
+}
+
+// PostModel PostModel
+func (c *BaseController) PostModel(m interface{}) (err error) {
+	v := reflect.New(reflect.TypeOf(m).Elem())
+	vInt := v.Interface()
+
+	err = c.ParseJSONBodyStruct(vInt)
+	if err != nil {
+		return err
+	}
+
+	_, err = models.InsertModel(vInt)
+	if err != nil {
+		return err
 	}
 	return
 }

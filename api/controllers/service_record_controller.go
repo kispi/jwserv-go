@@ -26,6 +26,24 @@ func (c *ServiceRecordController) Get() {
 	c.Success(int64(len(serviceRecords)), serviceRecords)
 }
 
+// Post Post
+func (c *ServiceRecordController) Post() {
+	serviceRecord := new(models.ServiceRecord)
+	err := c.ParseJSONBodyStruct(serviceRecord)
+	if err != nil {
+		c.Failed(err)
+		return
+	}
+
+	err = c.PostModel(serviceRecord)
+	if err != nil {
+		c.Failed(err)
+		return
+	}
+
+	c.Success(1, "success")
+}
+
 // GetByID GetByID
 func (c *ServiceRecordController) GetByID() {
 	idStr := c.Ctx.Input.Param(":id")
@@ -60,5 +78,5 @@ func (c *ServiceRecordController) Put() {
 		return
 	}
 
-	c.Success(1, "true")
+	c.Success(1, "success")
 }

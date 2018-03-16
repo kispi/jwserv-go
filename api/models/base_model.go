@@ -35,7 +35,7 @@ func InsertModel(obj interface{}) (id int64, err error) {
 
 	if err == nil {
 		st := reflect.ValueOf(obj).Elem()
-		idField := st.FieldByName("Id")
+		idField := st.FieldByName("ID")
 		idField.SetInt(id)
 	}
 	return

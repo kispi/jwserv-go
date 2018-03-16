@@ -60,5 +60,5 @@ func (c *UserController) Put() {
 		return
 	}
 
-	c.Success(1, "true")
+	c.Success(1, "success")
 }

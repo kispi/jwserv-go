@@ -26,6 +26,24 @@ func (c *CongregationController) Get() {
 	c.Success(int64(len(congregations)), congregations)
 }
 
+// Post Post
+func (c *CongregationController) Post() {
+	congregation := new(models.Congregation)
+	err := c.ParseJSONBodyStruct(congregation)
+	if err != nil {
+		c.Failed(err)
+		return
+	}
+
+	err = c.PostModel(congregation)
+	if err != nil {
+		c.Failed(err)
+		return
+	}
+
+	c.Success(1, "success")
+}
+
 // GetByID GetByID
 func (c *CongregationController) GetByID() {
 	idStr := c.Ctx.Input.Param(":id")
@@ -60,5 +78,5 @@ func (c *CongregationController) Put() {
 		return
 	}
 
-	c.Success(1, "true")
+	c.Success(1, "success")
 }
