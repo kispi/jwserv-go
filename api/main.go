@@ -19,6 +19,11 @@ var (
 	Port string
 )
 
+// Server Server Settings
+type Server struct {
+	UseSoftDelete bool
+}
+
 func loadEnvFile(envPath string) (err error) {
 	if _, err := os.Stat(envPath); os.IsNotExist(err) {
 		return errors.New("Not Exist")

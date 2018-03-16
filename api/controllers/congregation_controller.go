@@ -35,7 +35,32 @@ func (c *CongregationController) Post() {
 		return
 	}
 
-	err = c.PostModel(congregation)
+	_, err = models.InsertModel(congregation)
+	if err != nil {
+		c.Failed(err)
+		return
+	}
+
+	c.Success(1, "success")
+}
+
+// Delete Delete
+func (c *CongregationController) Delete() {
+	idStr := c.Ctx.Input.Param(":id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		c.Failed(err)
+		return
+	}
+
+	congregation := new(models.Congregation)
+	err = models.GetModelQuerySeter(new(models.Congregation), true).Filter("id", id).One(congregation)
+	if err != nil {
+		c.Failed(err)
+		return
+	}
+
+	err = models.DeleteModel(congregation)
 	if err != nil {
 		c.Failed(err)
 		return

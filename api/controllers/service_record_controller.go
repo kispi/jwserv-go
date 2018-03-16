@@ -35,7 +35,32 @@ func (c *ServiceRecordController) Post() {
 		return
 	}
 
-	err = c.PostModel(serviceRecord)
+	_, err = models.InsertModel(serviceRecord)
+	if err != nil {
+		c.Failed(err)
+		return
+	}
+
+	c.Success(1, "success")
+}
+
+// Delete Delete
+func (c *ServiceRecordController) Delete() {
+	idStr := c.Ctx.Input.Param(":id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		c.Failed(err)
+		return
+	}
+
+	serviceRecord := new(models.ServiceRecord)
+	err = models.GetModelQuerySeter(new(models.ServiceRecord), true).Filter("id", id).One(serviceRecord)
+	if err != nil {
+		c.Failed(err)
+		return
+	}
+
+	err = models.DeleteModel(serviceRecord)
 	if err != nil {
 		c.Failed(err)
 		return

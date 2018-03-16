@@ -10,6 +10,11 @@ import (
 	"github.com/davecgh/go-spew/spew"
 )
 
+var (
+	// UseSoftDelete UseSoftDelete
+	UseSoftDelete bool
+)
+
 // BaseModel BaseModel
 type BaseModel struct {
 	ID        int64      `orm:"column(id);auto" json:"id"`
@@ -21,6 +26,10 @@ type BaseModel struct {
 // ModelAdapter ModelAdapter
 type ModelAdapter interface {
 	TableName() string
+}
+
+func init() {
+	UseSoftDelete = true
 }
 
 // TableName TableName
@@ -52,6 +61,16 @@ func UpdateModel(obj interface{}, keys []string) (err error) {
 	return
 }
 
+// DeleteModel DeleteModel
+func DeleteModel(obj interface{}) (err error) {
+	if !UseSoftDelete {
+		err = HardDeleteModel(obj)
+	} else {
+		err = SoftDeleteModel(obj)
+	}
+	return
+}
+
 // SoftDeleteModel mark deleted_at instead of really deletes it.
 func SoftDeleteModel(m interface{}) (err error) {
 	field := reflect.ValueOf(m).Elem().FieldByName("DeleteAt")
@@ -67,8 +86,8 @@ func SoftDeleteModel(m interface{}) (err error) {
 	return
 }
 
-// DeleteModel really deletes data.
-func DeleteModel(m interface{}) (err error) {
+// HardDeleteModel really deletes data.
+func HardDeleteModel(m interface{}) (err error) {
 	o := orm.NewOrm()
 	if _, err := o.Delete(m); err != nil {
 		return err

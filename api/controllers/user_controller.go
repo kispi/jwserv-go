@@ -62,3 +62,28 @@ func (c *UserController) Put() {
 
 	c.Success(1, "success")
 }
+
+// Delete Delete
+func (c *UserController) Delete() {
+	idStr := c.Ctx.Input.Param(":id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		c.Failed(err)
+		return
+	}
+
+	user := new(models.User)
+	err = models.GetModelQuerySeter(new(models.User), true).Filter("id", id).One(user)
+	if err != nil {
+		c.Failed(err)
+		return
+	}
+
+	err = models.DeleteModel(user)
+	if err != nil {
+		c.Failed(err)
+		return
+	}
+
+	c.Success(1, "success")
+}

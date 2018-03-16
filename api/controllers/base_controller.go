@@ -133,23 +133,6 @@ func (c *BaseController) PutModel(m interface{}) (err error) {
 	return
 }
 
-// PostModel PostModel
-func (c *BaseController) PostModel(m interface{}) (err error) {
-	v := reflect.New(reflect.TypeOf(m).Elem())
-	vInt := v.Interface()
-
-	err = c.ParseJSONBodyStruct(vInt)
-	if err != nil {
-		return err
-	}
-
-	_, err = models.InsertModel(vInt)
-	if err != nil {
-		return err
-	}
-	return
-}
-
 // GetInputKeys GetInputKeys
 func (c *BaseController) GetInputKeys(v interface{}) []string {
 	keysCand := helper.GetInputKeys(c.Ctx.Input.RequestBody)
