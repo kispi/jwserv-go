@@ -18,7 +18,7 @@ func (c *UserController) Get() {
 	var err error
 	qs, err = c.SetQuerySeterByURIParam(qs)
 	if err != nil {
-		c.Failed(err)
+		c.Error(err)
 		return
 	}
 	qs.All(&users)
@@ -31,14 +31,14 @@ func (c *UserController) GetByID() {
 	idStr := c.Ctx.Input.Param(":id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
-		c.Failed(err)
+		c.Error(err)
 		return
 	}
 
 	user := new(models.User)
 	err = models.GetModelQuerySeter(new(models.User), true).Filter("id", id).One(user)
 	if err != nil {
-		c.Failed(err)
+		c.Error(err)
 		return
 	}
 
@@ -50,13 +50,13 @@ func (c *UserController) Put() {
 	user := new(models.User)
 	err := c.ParseJSONBodyStruct(user)
 	if err != nil {
-		c.Failed(err)
+		c.Error(err)
 		return
 	}
 
 	err = c.PutModel(user)
 	if err != nil {
-		c.Failed(err)
+		c.Error(err)
 		return
 	}
 
@@ -68,20 +68,20 @@ func (c *UserController) Delete() {
 	idStr := c.Ctx.Input.Param(":id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
-		c.Failed(err)
+		c.Error(err)
 		return
 	}
 
 	user := new(models.User)
 	err = models.GetModelQuerySeter(new(models.User), true).Filter("id", id).One(user)
 	if err != nil {
-		c.Failed(err)
+		c.Error(err)
 		return
 	}
 
 	err = models.DeleteModel(user)
 	if err != nil {
-		c.Failed(err)
+		c.Error(err)
 		return
 	}
 

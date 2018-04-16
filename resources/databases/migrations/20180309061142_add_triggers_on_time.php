@@ -5,6 +5,7 @@ use Phinx\Migration\AbstractMigration;
 class AddTriggersOnTime extends AbstractMigration
 {
     protected $tables_to_create = [
+        "auth_tokens",
         "congregations",
         "service_records",
         "users"

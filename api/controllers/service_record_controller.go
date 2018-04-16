@@ -18,7 +18,7 @@ func (c *ServiceRecordController) Get() {
 	var err error
 	qs, err = c.SetQuerySeterByURIParam(qs)
 	if err != nil {
-		c.Failed(err)
+		c.Error(err)
 		return
 	}
 	qs.All(&serviceRecords)
@@ -31,13 +31,13 @@ func (c *ServiceRecordController) Post() {
 	serviceRecord := new(models.ServiceRecord)
 	err := c.ParseJSONBodyStruct(serviceRecord)
 	if err != nil {
-		c.Failed(err)
+		c.Error(err)
 		return
 	}
 
 	_, err = models.InsertModel(serviceRecord)
 	if err != nil {
-		c.Failed(err)
+		c.Error(err)
 		return
 	}
 
@@ -49,20 +49,20 @@ func (c *ServiceRecordController) Delete() {
 	idStr := c.Ctx.Input.Param(":id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
-		c.Failed(err)
+		c.Error(err)
 		return
 	}
 
 	serviceRecord := new(models.ServiceRecord)
 	err = models.GetModelQuerySeter(new(models.ServiceRecord), true).Filter("id", id).One(serviceRecord)
 	if err != nil {
-		c.Failed(err)
+		c.Error(err)
 		return
 	}
 
 	err = models.DeleteModel(serviceRecord)
 	if err != nil {
-		c.Failed(err)
+		c.Error(err)
 		return
 	}
 
@@ -74,14 +74,14 @@ func (c *ServiceRecordController) GetByID() {
 	idStr := c.Ctx.Input.Param(":id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
-		c.Failed(err)
+		c.Error(err)
 		return
 	}
 
 	serviceRecord := new(models.ServiceRecord)
 	err = models.GetModelQuerySeter(new(models.ServiceRecord), true).Filter("id", id).One(serviceRecord)
 	if err != nil {
-		c.Failed(err)
+		c.Error(err)
 		return
 	}
 
@@ -93,13 +93,13 @@ func (c *ServiceRecordController) Put() {
 	serviceRecord := new(models.ServiceRecord)
 	err := c.ParseJSONBodyStruct(serviceRecord)
 	if err != nil {
-		c.Failed(err)
+		c.Error(err)
 		return
 	}
 
 	err = c.PutModel(serviceRecord)
 	if err != nil {
-		c.Failed(err)
+		c.Error(err)
 		return
 	}
 

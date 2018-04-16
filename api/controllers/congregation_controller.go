@@ -18,7 +18,7 @@ func (c *CongregationController) Get() {
 	var err error
 	qs, err = c.SetQuerySeterByURIParam(qs)
 	if err != nil {
-		c.Failed(err)
+		c.Error(err)
 		return
 	}
 	qs.All(&congregations)
@@ -31,13 +31,13 @@ func (c *CongregationController) Post() {
 	congregation := new(models.Congregation)
 	err := c.ParseJSONBodyStruct(congregation)
 	if err != nil {
-		c.Failed(err)
+		c.Error(err)
 		return
 	}
 
 	_, err = models.InsertModel(congregation)
 	if err != nil {
-		c.Failed(err)
+		c.Error(err)
 		return
 	}
 
@@ -49,20 +49,20 @@ func (c *CongregationController) Delete() {
 	idStr := c.Ctx.Input.Param(":id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
-		c.Failed(err)
+		c.Error(err)
 		return
 	}
 
 	congregation := new(models.Congregation)
 	err = models.GetModelQuerySeter(new(models.Congregation), true).Filter("id", id).One(congregation)
 	if err != nil {
-		c.Failed(err)
+		c.Error(err)
 		return
 	}
 
 	err = models.DeleteModel(congregation)
 	if err != nil {
-		c.Failed(err)
+		c.Error(err)
 		return
 	}
 
@@ -74,14 +74,14 @@ func (c *CongregationController) GetByID() {
 	idStr := c.Ctx.Input.Param(":id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
-		c.Failed(err)
+		c.Error(err)
 		return
 	}
 
 	congregation := new(models.Congregation)
 	err = models.GetModelQuerySeter(new(models.Congregation), true).Filter("id", id).One(congregation)
 	if err != nil {
-		c.Failed(err)
+		c.Error(err)
 		return
 	}
 
@@ -93,13 +93,13 @@ func (c *CongregationController) Put() {
 	congregation := new(models.Congregation)
 	err := c.ParseJSONBodyStruct(congregation)
 	if err != nil {
-		c.Failed(err)
+		c.Error(err)
 		return
 	}
 
 	err = c.PutModel(congregation)
 	if err != nil {
-		c.Failed(err)
+		c.Error(err)
 		return
 	}
 

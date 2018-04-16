@@ -7,6 +7,10 @@ import (
 )
 
 func init() {
+	authController := &controllers.AuthController{}
+	beego.Router("/signUp", authController, "post:SignUp")
+	beego.Router("/signInLocal", authController, "post:SignIn")
+
 	userController := &controllers.UserController{}
 	beego.Router("/users", userController, "get:Get")
 	beego.Router("/users/:id", userController, "get:GetByID;put:Put;delete:Delete")

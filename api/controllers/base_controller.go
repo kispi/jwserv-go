@@ -13,6 +13,7 @@ import (
 
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
+	"github.com/bitly/go-simplejson"
 )
 
 // BaseController UserController
@@ -34,10 +35,9 @@ func (c *BaseController) Success(total int64, data interface{}) {
 }
 
 // Failed Failed
-func (c *BaseController) Failed(err error) {
+func (c *BaseController) Error(err error) {
 	c.Ctx.Output.SetStatus(500)
-	c.Data["json"] = Response{1, err.Error()}
-	c.ServeJSON()
+	c.Ctx.ResponseWriter.Write([]byte(err.Error()))
 }
 
 // ParseJSONBodyStruct ParseJSONBodyStruct
@@ -47,6 +47,15 @@ func (c *BaseController) ParseJSONBodyStruct(v interface{}) error {
 		return err
 	}
 	return nil
+}
+
+// ParseJSONBody ParseJSONBody
+func (c *BaseController) ParseJSONBody() (json *simplejson.Json, err error) {
+	json, err = simplejson.NewJson(c.Ctx.Input.RequestBody)
+	if err != nil {
+		return nil, err
+	}
+	return json, nil
 }
 
 // SetQuerySeterByURIParam SetQuerySeterByURIParam
@@ -153,4 +162,18 @@ func (c *BaseController) GetInputKeys(v interface{}) []string {
 	}
 
 	return keysUpdate
+}
+
+// GetAuthUser GetAuthUser
+func (c *BaseController) GetAuthUser() (*models.User, error) {
+	apikey := c.Ctx.Input.Header("apikey")
+	if apikey != "" {
+		authToken := new(models.AuthToken)
+		err := models.GetModelQuerySeter(authToken, false).Filter("auth_token", apikey).RelatedSel("User").One(authToken)
+		if err != nil {
+			return nil, errors.New("Invalid Apikey")
+		}
+		return authToken.User, nil
+	}
+	return nil, errors.New("Invalid Apikey")
 }

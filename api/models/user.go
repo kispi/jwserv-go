@@ -16,7 +16,7 @@ type User struct {
 	Phone        string        `orm:"column(phone);" json:"phone,omitempty"`
 	Name         string        `orm:"column(name);" json:"name,omitempty"`
 	Password     string        `orm:"column(password);" json:"password,omitempty"`
-	Auth         string        `orm:"column(auth);" json:"auth,omitempty"`
+	Role         string        `orm:"column(role);" json:"role,omitempty"`
 	LastActivity *time.Time    `orm:"column(last_activity);type(timestamp)" json:"lastActivity,omitempty"`
 }
 
@@ -27,4 +27,25 @@ func (t *User) TableName() string {
 
 func init() {
 	orm.RegisterModel(new(User))
+}
+
+// RenewAuthToken - renews auth token
+func (t *User) RenewAuthToken() (*AuthToken, error) {
+	authToken := &AuthToken{}
+	qs := GetModelQuerySeter(new(AuthToken), true)
+	err := qs.Filter("user_id__id", t.ID).One(authToken)
+	if err != nil {
+		authToken = NewAuthToken(t)
+		_, err = InsertModel(authToken)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		authToken.LastLogin = time.Now()
+		err = UpdateModel(authToken, []string{"last_login"})
+		if err != nil {
+			return nil, err
+		}
+	}
+	return authToken, nil
 }
