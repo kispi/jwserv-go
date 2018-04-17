@@ -26,7 +26,7 @@ class CreateInitialTables extends AbstractMigration
         ->addColumn('phone', 'string', ['null' => true])
         ->addColumn('name', 'string', ['null' => true])
         ->addColumn('password', 'string', ['null' => true])
-        ->addColumn('role', 'enum', ['values' => ['r', 'a', 'w'], 'default' => 'r'])
+        ->addColumn('role', 'enum', ['values' => ['public', 'admin', 'writer'], 'default' => 'public'])
         ->addColumn('last_activity', 'timestamp', ['null' => true])
         ->addForeignKey('congregation_id', 'congregations', 'id', ['delete' => 'SET NULL', 'update' => 'CASCADE'])
         ->save();
