@@ -36,7 +36,7 @@ func (c *BaseController) Success(total int64, data interface{}) {
 
 // Failed Failed
 func (c *BaseController) Error(err error) {
-	c.Ctx.Output.SetStatus(500)
+	c.Ctx.ResponseWriter.WriteHeader(500)
 	c.Ctx.ResponseWriter.Write([]byte(err.Error()))
 }
 

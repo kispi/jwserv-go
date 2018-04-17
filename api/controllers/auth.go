@@ -103,9 +103,9 @@ func (c *AuthController) signInWithCreds(cred map[string]string) {
 		var authToken *models.AuthToken
 		if authToken, err = authUser.RenewAuthToken(); err != nil {
 			c.Error(err)
-			return
+		} else {
+			c.Success(1, authToken)
 		}
-		c.Success(1, authToken)
 	}
 }
 

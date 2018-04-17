@@ -11,6 +11,16 @@ type UserController struct {
 	BaseController
 }
 
+// Me Me
+func (c *UserController) Me() {
+	user, err := c.GetAuthUser()
+	if err != nil {
+		c.Error(err)
+		return
+	}
+	c.Success(1, user)
+}
+
 // Get Get
 func (c *UserController) Get() {
 	users := []*models.User{}

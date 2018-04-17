@@ -8,18 +8,24 @@ import (
 
 func init() {
 	authController := &controllers.AuthController{}
-	beego.Router("/signUp", authController, "post:SignUp")
-	beego.Router("/signInLocal", authController, "post:SignIn")
-
 	userController := &controllers.UserController{}
-	beego.Router("/users", userController, "get:Get")
-	beego.Router("/users/:id", userController, "get:GetByID;put:Put;delete:Delete")
-
 	serviceRecordController := &controllers.ServiceRecordController{}
-	beego.Router("/serviceRecords", serviceRecordController, "get:Get;post:Post")
-	beego.Router("/serviceRecords/:id", serviceRecordController, "get:GetByID;put:Put;delete:Delete")
-
 	congregationController := &controllers.CongregationController{}
-	beego.Router("/congregations", congregationController, "get:Get;post:Post")
-	beego.Router("/congregations/:id", congregationController, "get:GetByID;put:Put;delete:Delete")
+
+	ns := beego.NewNamespace("/v1",
+		beego.NSRouter("/signUpLocal", authController, "post:SignUp"),
+		beego.NSRouter("/signInLocal", authController, "post:SignIn"),
+
+		beego.NSRouter("/me", userController, "get:Me"),
+		beego.NSRouter("/users", userController, "get:Get"),
+		beego.NSRouter("/users/:id", userController, "get:GetByID;put:Put;delete:Delete"),
+
+		beego.NSRouter("/serviceRecords", serviceRecordController, "get:Get;post:Post"),
+		beego.NSRouter("/serviceRecords/:id", serviceRecordController, "get:GetByID;put:Put;delete:Delete"),
+
+		beego.NSRouter("/congregations", congregationController, "get:Get;post:Post"),
+		beego.NSRouter("/congregations/:id", congregationController, "get:GetByID;put:Put;delete:Delete"),
+	)
+
+	beego.AddNamespace(ns)
 }

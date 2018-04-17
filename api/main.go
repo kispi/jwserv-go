@@ -6,6 +6,7 @@ import (
 
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
+	"github.com/astaxie/beego/plugins/cors"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/joho/godotenv"
 )
@@ -49,14 +50,20 @@ func setDB() {
 	Port = os.Getenv("DB_PORT")
 }
 
-func setHTTP() {
+func setRequestAndResponse() {
+	beego.InsertFilter("*", beego.BeforeRouter, cors.Allow(&cors.Options{
+		AllowAllOrigins: true,
+		AllowMethods:    []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:    []string{"Origin", "Authorization", "Access-Control-Allow-Origin", "apikey", "Content-Type"},
+		ExposeHeaders:   []string{"Content-Length", "Access-Control-Allow-Origin"},
+	}))
 	beego.BConfig.CopyRequestBody = true
 }
 
 func init() {
 	loadEnvFile("../.env")
 	setDB()
-	setHTTP()
+	setRequestAndResponse()
 	orm.RegisterDriver("mysql", orm.DRMySQL)
 	orm.RegisterDataBase("default", "mysql", User+":"+Pass+"@tcp("+Host+":"+Port+")/"+Name+"?charset=utf8mb4&sql_mode=TRADITIONAL")
 }
