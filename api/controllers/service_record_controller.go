@@ -15,12 +15,7 @@ type ServiceRecordController struct {
 func (c *ServiceRecordController) Get() {
 	serviceRecords := []*models.ServiceRecord{}
 	qs := models.GetModelQuerySeter(new(models.ServiceRecord), true)
-	var err error
-	qs, err = c.SetQuerySeterByURIParam(qs)
-	if err != nil {
-		c.Error(err)
-		return
-	}
+	qs, _ = c.SetQuerySeterByURIParam(qs)
 	qs.All(&serviceRecords)
 
 	c.Success(int64(len(serviceRecords)), serviceRecords)

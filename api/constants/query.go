@@ -6,7 +6,7 @@ const (
 	// Limit Limit
 	Limit = "limit"
 	// OrderBy OrderBy
-	OrderBy = "sortby"
+	OrderBy = "orderby"
 	// GroupBy GroupBy
 	GroupBy = "groupby"
 	// Offset Offset

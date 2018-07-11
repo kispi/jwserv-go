@@ -62,9 +62,9 @@ func (c *BaseController) ParseJSONBody() (json *simplejson.Json, err error) {
 func (c *BaseController) SetQuerySeterByURIParam(qs orm.QuerySeter) (orm.QuerySeter, error) {
 	uriParts := strings.Split(c.Ctx.Request.RequestURI, "?")
 	if len(uriParts) == 1 {
-		return nil, errors.New("no url parameters given")
+		return qs, errors.New("NO_URL_PARAMETERS")
 	} else if uriParts[1] == "" {
-		return nil, errors.New("no url parameters given")
+		return qs, errors.New("NO_URL_PARAMETERS")
 	}
 	queries := strings.Split(uriParts[1], "&")
 	for _, q := range queries {
@@ -98,7 +98,7 @@ func (c *BaseController) SetQuerySeterByURIParam(qs orm.QuerySeter) (orm.QuerySe
 		case constants.GroupBy:
 			qs = qs.GroupBy(pair[1])
 		default:
-			return nil, errors.New("Non exist query key")
+			return nil, errors.New("NON_EXIST_QUERY_KEY")
 		}
 	}
 	return qs, nil

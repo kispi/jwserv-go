@@ -1,9 +1,11 @@
 package controllers
 
 import (
+	"errors"
 	"strconv"
 
 	"../models"
+	"../services"
 )
 
 // CongregationController CongregationController
@@ -15,14 +17,10 @@ type CongregationController struct {
 func (c *CongregationController) Get() {
 	congregations := []*models.Congregation{}
 	qs := models.GetModelQuerySeter(new(models.Congregation), true)
-	var err error
-	qs, err = c.SetQuerySeterByURIParam(qs)
-	if err != nil {
-		c.Error(err)
-		return
-	}
+	qs, _ = c.SetQuerySeterByURIParam(qs)
 	qs.All(&congregations)
 
+	services.Log.Debug("TEST")
 	c.Success(int64(len(congregations)), congregations)
 }
 
@@ -32,6 +30,11 @@ func (c *CongregationController) Post() {
 	err := c.ParseJSONBodyStruct(congregation)
 	if err != nil {
 		c.Error(err)
+		return
+	}
+
+	if models.GetModelQuerySeter(new(models.Congregation), true).Filter("name", congregation.Name).Exist() {
+		c.Error(errors.New("CONGREGATION_ALREADY_EXISTS"))
 		return
 	}
 

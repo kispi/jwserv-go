@@ -50,16 +50,17 @@ func (c *AuthController) SignUp() {
 		c.Error(errors.New("ERROR_MISSING_PASSWORD"))
 		return
 	}
-	// name, err := json.Get("name").String()
-	// if err != nil || name == "" {
-	// 	c.Error(errors.New("ERROR_MISSING_NAME"))
-	// 	return
-	// }
-	// phone, err := json.Get("phone").String()
-	// if err != nil || phone == "" {
-	// 	c.Error(errors.New("ERROR_MISSING_PHONE"))
-	// 	return
-	// }
+	name, err := json.Get("name").String()
+	if err != nil || name == "" {
+		c.Error(errors.New("ERROR_MISSING_NAME"))
+		return
+	}
+	congregationID, err := json.Get("congregationID").Int64()
+	if err != nil || congregationID == 0 {
+		c.Error(errors.New("ERROR_MISSING_CONGREGATION_ID"))
+		return
+	}
+	phone, err := json.Get("phone").String()
 
 	if models.GetModelQuerySeter(new(models.User), false).Filter("email", email).Exist() {
 		c.Error(errors.New("ERROR_EMAIL"))
@@ -72,25 +73,23 @@ func (c *AuthController) SignUp() {
 		return
 	}
 
-	user := new(models.User)
-	user.Email = email
-	user.Password = string(hashedBytes[:])
-	user.Role = "r"
-	// user.Phone = phone
-	// user.Name = name
+	congregation := &models.Congregation{}
+	congregation.ID = congregationID
+	user := &models.User{
+		Email:        email,
+		Password:     string(hashedBytes[:]),
+		Role:         "public",
+		Name:         name,
+		Congregation: congregation,
+	}
+	if phone != "" {
+		user.Phone = phone
+	}
 
 	if _, err = models.InsertModel(user); err != nil {
 		c.Error(err)
 		return
 	}
-	if count, err := models.GetModelQuerySeter(user, false).Filter("email", user.Email).Count(); err != nil {
-		c.Error(errors.New("ERROR_EMAIL"))
-		return
-	} else if count > 1 {
-		c.Error(errors.New("ERROR_EMAIL"))
-		return
-	}
-
 	c.signInLocal(user.Email, rawPassword)
 }
 
@@ -121,9 +120,9 @@ func AuthCheckLoginCallback(cred map[string]string) (*models.User, error) {
 			if err := bcrypt.CompareHashAndPassword(dbPassword, rawPassword); err == nil {
 				return user, nil
 			}
-			return nil, errors.New("Invalid Password")
+			return nil, errors.New("INVALID_PASSWORD")
 		}
-		return nil, errors.New("Non Exist User")
+		return nil, errors.New("NON_EXIST_USER")
 	}
-	return nil, errors.New("Auth Error")
+	return nil, errors.New("AUTH_ERROR")
 }
