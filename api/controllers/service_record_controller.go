@@ -13,8 +13,15 @@ type ServiceRecordController struct {
 
 // Get Get
 func (c *ServiceRecordController) Get() {
+	user, err := c.GetAuthUser()
+	if err != nil {
+		c.Error(err)
+		return
+	}
+
 	serviceRecords := []*models.ServiceRecord{}
 	qs := models.GetModelQuerySeter(new(models.ServiceRecord), true)
+	qs = qs.Filter("congregation_id", user.Congregation.ID)
 	qs, _ = c.SetQuerySeterByURIParam(qs)
 	qs.All(&serviceRecords)
 
