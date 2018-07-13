@@ -3,6 +3,7 @@ package controllers
 import (
 	"encoding/json"
 	"errors"
+	"net/url"
 	"reflect"
 	"strconv"
 	"strings"
@@ -79,7 +80,7 @@ func (c *BaseController) SetQuerySeterByURIParam(qs orm.QuerySeter) (orm.QuerySe
 			var err error
 			qs, err = parseFilters(qs, pair[1])
 			if err != nil {
-				return nil, errors.New("filter: error during query parsing")
+				return nil, err
 			}
 		case constants.Limit:
 			val, err := strconv.ParseInt(pair[1], 10, 64)
@@ -113,7 +114,8 @@ func parseFilters(qs orm.QuerySeter, filter string) (orm.QuerySeter, error) {
 		} else if pair[1] == "" {
 			return nil, errors.New("wrong query format (lack of key or value)")
 		}
-		qs = qs.Filter(pair[0], pair[1])
+		queryValue, _ := url.QueryUnescape(pair[1])
+		qs = qs.Filter(pair[0], queryValue)
 	}
 	return qs, nil
 }

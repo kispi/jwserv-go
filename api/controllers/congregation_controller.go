@@ -5,7 +5,6 @@ import (
 	"strconv"
 
 	"../models"
-	"../services"
 )
 
 // CongregationController CongregationController
@@ -20,7 +19,6 @@ func (c *CongregationController) Get() {
 	qs, _ = c.SetQuerySeterByURIParam(qs)
 	qs.All(&congregations)
 
-	services.Log.Debug("TEST")
 	c.Success(int64(len(congregations)), congregations)
 }
 
