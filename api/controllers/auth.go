@@ -63,7 +63,7 @@ func (c *AuthController) SignUp() {
 	phone, err := json.Get("phone").String()
 
 	if models.GetModelQuerySeter(new(models.User), false).Filter("email", email).Exist() {
-		c.Error(errors.New("ERROR_EMAIL"))
+		c.Error(errors.New("ERROR_EMAIL_ALREADY_EXISTS"))
 		return
 	}
 

@@ -1,9 +1,11 @@
 package controllers
 
 import (
+	"errors"
 	"strconv"
 
 	"../models"
+	"../services"
 )
 
 // ServiceRecordController ServiceRecordController
@@ -30,13 +32,37 @@ func (c *ServiceRecordController) Get() {
 
 // Post Post
 func (c *ServiceRecordController) Post() {
-	serviceRecord := new(models.ServiceRecord)
-	err := c.ParseJSONBodyStruct(serviceRecord)
+	user, err := c.GetAuthUser()
 	if err != nil {
 		c.Error(err)
 		return
 	}
 
+	serviceRecord := new(models.ServiceRecord)
+	err = c.ParseJSONBodyStruct(serviceRecord)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+
+	services.Log.Debug(serviceRecord)
+	if serviceRecord.Area == "" {
+		c.Error(errors.New("ERROR_MISSING_AREA"))
+		return
+	}
+
+	if serviceRecord.StartedAt == nil {
+		c.Error(errors.New("ERROR_MISSING_STARTED_AT"))
+		return
+	}
+
+	if serviceRecord.LeaderName == "" {
+		c.Error(errors.New("ERROR_MISSING_LEADER_NAME"))
+		return
+	}
+
+	serviceRecord.Congregation = user.Congregation
+	serviceRecord.Recorder = user
 	_, err = models.InsertModel(serviceRecord)
 	if err != nil {
 		c.Error(err)
@@ -48,6 +74,12 @@ func (c *ServiceRecordController) Post() {
 
 // Delete Delete
 func (c *ServiceRecordController) Delete() {
+	_, err := c.GetAuthUser()
+	if err != nil {
+		c.Error(err)
+		return
+	}
+
 	idStr := c.Ctx.Input.Param(":id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
@@ -73,6 +105,12 @@ func (c *ServiceRecordController) Delete() {
 
 // GetByID GetByID
 func (c *ServiceRecordController) GetByID() {
+	_, err := c.GetAuthUser()
+	if err != nil {
+		c.Error(err)
+		return
+	}
+
 	idStr := c.Ctx.Input.Param(":id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
@@ -92,8 +130,14 @@ func (c *ServiceRecordController) GetByID() {
 
 // Put Put
 func (c *ServiceRecordController) Put() {
+	_, err := c.GetAuthUser()
+	if err != nil {
+		c.Error(err)
+		return
+	}
+
 	serviceRecord := new(models.ServiceRecord)
-	err := c.ParseJSONBodyStruct(serviceRecord)
+	err = c.ParseJSONBodyStruct(serviceRecord)
 	if err != nil {
 		c.Error(err)
 		return

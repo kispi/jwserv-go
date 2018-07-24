@@ -171,7 +171,11 @@ func (c *BaseController) GetAuthUser() (*models.User, error) {
 	apikey := c.Ctx.Input.Header("apikey")
 	if apikey != "" {
 		authToken := new(models.AuthToken)
-		err := models.GetModelQuerySeter(authToken, false).Filter("auth_token", apikey).RelatedSel("User").One(authToken)
+		err := models.GetModelQuerySeter(authToken, false).
+			Filter("auth_token", apikey).
+			RelatedSel("User").
+			RelatedSel("User__Congregation").
+			One(authToken)
 		if err != nil {
 			return nil, errors.New("Invalid Apikey")
 		}
