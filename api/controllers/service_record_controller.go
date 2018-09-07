@@ -5,7 +5,6 @@ import (
 	"strconv"
 
 	"../models"
-	"../services"
 )
 
 // ServiceRecordController ServiceRecordController
@@ -27,7 +26,8 @@ func (c *ServiceRecordController) Get() {
 	qs, _ = c.SetQuerySeterByURIParam(qs)
 	qs.All(&serviceRecords)
 
-	c.Success(int64(len(serviceRecords)), serviceRecords)
+	total, _ := models.GetModelQuerySeter(new(models.ServiceRecord), false).Count()
+	c.Success(total, serviceRecords)
 }
 
 // Post Post
@@ -45,7 +45,6 @@ func (c *ServiceRecordController) Post() {
 		return
 	}
 
-	services.Log.Debug(serviceRecord)
 	if serviceRecord.Area == "" {
 		c.Error(errors.New("ERROR_MISSING_AREA"))
 		return
