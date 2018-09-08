@@ -2,3 +2,4 @@ api/api
 vendor
 .env
 resources/databases/migrations/20180309071142_add_initial_data.php
+api/api.exe

@@ -16,7 +16,7 @@ type CongregationController struct {
 func (c *CongregationController) Get() {
 	congregations := []*models.Congregation{}
 	qs := models.GetModelQuerySeter(new(models.Congregation), true)
-	qs, _ = c.SetQuerySeterByURIParam(qs)
+	qs, _, _ = c.SetQuerySeterByURIParam(qs)
 	qs.All(&congregations)
 
 	c.Success(int64(len(congregations)), congregations)

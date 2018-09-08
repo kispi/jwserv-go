@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"../constants"
-	"../helper"
+	"../helpers"
 	"../models"
 
 	"github.com/astaxie/beego"
@@ -60,49 +60,71 @@ func (c *BaseController) ParseJSONBody() (json *simplejson.Json, err error) {
 }
 
 // SetQuerySeterByURIParam SetQuerySeterByURIParam
-func (c *BaseController) SetQuerySeterByURIParam(qs orm.QuerySeter) (orm.QuerySeter, error) {
+func (c *BaseController) SetQuerySeterByURIParam(qs orm.QuerySeter) (orm.QuerySeter, []string, error) {
+	fields := make(map[string]int64)
 	uriParts := strings.Split(c.Ctx.Request.RequestURI, "?")
 	if len(uriParts) == 1 {
-		return qs, errors.New("NO_URL_PARAMETERS")
+		return qs, nil, errors.New("NO_URL_PARAMETERS")
 	} else if uriParts[1] == "" {
-		return qs, errors.New("NO_URL_PARAMETERS")
+		return qs, nil, errors.New("NO_URL_PARAMETERS")
 	}
 	queries := strings.Split(uriParts[1], "&")
 	for _, q := range queries {
 		pair := strings.Split(q, "=")
 		if len(pair) != 2 {
-			return nil, errors.New("wrong query format (missing '=')")
+			return nil, nil, errors.New("wrong query format (missing '=')")
 		} else if pair[1] == "" {
-			return nil, errors.New("wrong query format (lack of key or value)")
+			return nil, nil, errors.New("wrong query format (lack of key or value)")
 		}
 		switch pair[0] {
 		case constants.Filter:
 			var err error
 			qs, err = parseFilters(qs, pair[1])
 			if err != nil {
-				return nil, err
+				return nil, nil, err
 			}
+			fields[constants.Filter]++
 		case constants.Limit:
 			val, err := strconv.ParseInt(pair[1], 10, 64)
 			if err != nil {
-				return nil, errors.New("limit: cannot parse value as int64")
+				return nil, nil, errors.New("limit: cannot parse value as int64")
 			}
 			qs = qs.Limit(val)
+			fields[constants.Limit]++
 		case constants.Offset:
 			val, err := strconv.ParseInt(pair[1], 10, 64)
 			if err != nil {
-				return nil, errors.New("offset: cannot parse value as int64")
+				return nil, nil, errors.New("offset: cannot parse value as int64")
 			}
 			qs = qs.Offset(val)
+			fields[constants.Offset]++
 		case constants.OrderBy:
 			qs = qs.OrderBy(pair[1])
+			fields[constants.OrderBy]++
 		case constants.GroupBy:
 			qs = qs.GroupBy(pair[1])
+			fields[constants.GroupBy]++
 		default:
-			return nil, errors.New("NON_EXIST_QUERY_KEY")
+			return nil, nil, errors.New("NON_EXIST_QUERY_KEY")
 		}
 	}
-	return qs, nil
+
+	usedFields := []string{}
+	for k := range fields {
+		usedFields = append(usedFields, k)
+	}
+	return qs, usedFields, nil
+}
+
+// HasQueryParam returns if queryParam exists
+func (c *BaseController) HasQueryParam() bool {
+	uriParts := strings.Split(c.Ctx.Request.RequestURI, "?")
+	if len(uriParts) == 1 {
+		return false
+	} else if uriParts[1] == "" {
+		return false
+	}
+	return true
 }
 
 func parseFilters(qs orm.QuerySeter, filter string) (orm.QuerySeter, error) {
@@ -146,7 +168,7 @@ func (c *BaseController) PutModel(m interface{}) (err error) {
 
 // GetInputKeys GetInputKeys
 func (c *BaseController) GetInputKeys(v interface{}) []string {
-	keysCand := helper.GetInputKeys(c.Ctx.Input.RequestBody)
+	keysCand := helpers.GetInputKeys(c.Ctx.Input.RequestBody)
 	keysModels := []string{}
 
 	vType := reflect.TypeOf(v).Elem()
@@ -158,7 +180,7 @@ func (c *BaseController) GetInputKeys(v interface{}) []string {
 
 	keysUpdate := []string{}
 	for _, k := range keysCand {
-		if helper.HasElem(keysModels, k) {
+		if helpers.HasElem(keysModels, k) {
 			keysUpdate = append(keysUpdate, k)
 		}
 	}
