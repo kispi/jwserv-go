@@ -25,7 +25,7 @@ func (c *UserController) Me() {
 func (c *UserController) Get() {
 	users := []*models.User{}
 	qs := models.GetModelQuerySeter(new(models.User), true)
-	qs, _, _ = c.SetQuerySeterByURIParam(qs)
+	qs, _, _, _ = c.SetQuerySeterByURIParam(qs)
 	qs.All(&users)
 
 	c.Success(int64(len(users)), users)

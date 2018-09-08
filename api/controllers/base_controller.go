@@ -60,52 +60,55 @@ func (c *BaseController) ParseJSONBody() (json *simplejson.Json, err error) {
 }
 
 // SetQuerySeterByURIParam SetQuerySeterByURIParam
-func (c *BaseController) SetQuerySeterByURIParam(qs orm.QuerySeter) (orm.QuerySeter, []string, error) {
+func (c *BaseController) SetQuerySeterByURIParam(qs orm.QuerySeter) (orm.QuerySeter, []string, int64, error) {
 	fields := make(map[string]int64)
 	uriParts := strings.Split(c.Ctx.Request.RequestURI, "?")
 	if len(uriParts) == 1 {
-		return qs, nil, errors.New("NO_URL_PARAMETERS")
+		return qs, nil, 0, errors.New("NO_URL_PARAMETERS")
 	} else if uriParts[1] == "" {
-		return qs, nil, errors.New("NO_URL_PARAMETERS")
+		return qs, nil, 0, errors.New("NO_URL_PARAMETERS")
 	}
 	queries := strings.Split(uriParts[1], "&")
+	queries = helpers.MoveLimitToEnd(queries)
+	var subLimit int64
 	for _, q := range queries {
 		pair := strings.Split(q, "=")
 		if len(pair) != 2 {
-			return nil, nil, errors.New("wrong query format (missing '=')")
+			return nil, nil, 0, errors.New("wrong query format (missing '=')")
 		} else if pair[1] == "" {
-			return nil, nil, errors.New("wrong query format (lack of key or value)")
+			return nil, nil, 0, errors.New("wrong query format (lack of key or value)")
 		}
 		switch pair[0] {
 		case constants.Filter:
 			var err error
 			qs, err = parseFilters(qs, pair[1])
 			if err != nil {
-				return nil, nil, err
+				return nil, nil, 0, err
 			}
 			fields[constants.Filter]++
-		case constants.Limit:
-			val, err := strconv.ParseInt(pair[1], 10, 64)
-			if err != nil {
-				return nil, nil, errors.New("limit: cannot parse value as int64")
-			}
-			qs = qs.Limit(val)
-			fields[constants.Limit]++
-		case constants.Offset:
-			val, err := strconv.ParseInt(pair[1], 10, 64)
-			if err != nil {
-				return nil, nil, errors.New("offset: cannot parse value as int64")
-			}
-			qs = qs.Offset(val)
-			fields[constants.Offset]++
 		case constants.OrderBy:
 			qs = qs.OrderBy(pair[1])
 			fields[constants.OrderBy]++
 		case constants.GroupBy:
 			qs = qs.GroupBy(pair[1])
 			fields[constants.GroupBy]++
+		case constants.Limit:
+			val, err := strconv.ParseInt(pair[1], 10, 64)
+			if err != nil {
+				return nil, nil, 0, errors.New("limit: cannot parse value as int64")
+			}
+			subLimit, _ = qs.Count()
+			qs = qs.Limit(val)
+			fields[constants.Limit]++
+		case constants.Offset:
+			val, err := strconv.ParseInt(pair[1], 10, 64)
+			if err != nil {
+				return nil, nil, 0, errors.New("offset: cannot parse value as int64")
+			}
+			qs = qs.Offset(val)
+			fields[constants.Offset]++
 		default:
-			return nil, nil, errors.New("NON_EXIST_QUERY_KEY")
+			return nil, nil, 0, errors.New("NON_EXIST_QUERY_KEY")
 		}
 	}
 
@@ -113,7 +116,7 @@ func (c *BaseController) SetQuerySeterByURIParam(qs orm.QuerySeter) (orm.QuerySe
 	for k := range fields {
 		usedFields = append(usedFields, k)
 	}
-	return qs, usedFields, nil
+	return qs, usedFields, subLimit, nil
 }
 
 // HasQueryParam returns if queryParam exists

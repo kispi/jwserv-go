@@ -8,7 +8,6 @@ import (
 
 	"../helpers"
 	"../models"
-	"../services"
 )
 
 // ServiceRecordController ServiceRecordController
@@ -27,13 +26,10 @@ func (c *ServiceRecordController) Get() {
 	serviceRecords := []*models.ServiceRecord{}
 	qs := models.GetModelQuerySeter(new(models.ServiceRecord), true)
 	qs = qs.Filter("congregation_id", user.Congregation.ID)
-	qs, _, _ = c.SetQuerySeterByURIParam(qs)
+	qs, _, subLimit, _ := c.SetQuerySeterByURIParam(qs)
 	qs.All(&serviceRecords)
 
-	total, _ := models.GetModelQuerySeter(new(models.ServiceRecord), false).
-		Filter("congregation_id", user.Congregation.ID).
-		Count()
-	c.Success(total, serviceRecords)
+	c.Success(subLimit, serviceRecords)
 }
 
 // Post Post
@@ -108,8 +104,8 @@ func (c *ServiceRecordController) Delete() {
 	c.Success(1, "success")
 }
 
-// GetWithURLParam GetWithURLParam
-func (c *ServiceRecordController) GetWithURLParam() {
+// GetWithDayName GetWithDayName
+func (c *ServiceRecordController) GetWithDayName() {
 	user, err := c.GetAuthUser()
 	if err != nil {
 		c.Error(err)
@@ -145,15 +141,14 @@ func (c *ServiceRecordController) GetWithURLParam() {
 			ids = append(ids, r.ID)
 		}
 		qs := models.GetModelQuerySeter(new(models.ServiceRecord), true).Filter("id__in", ids)
-		qs, fields, _ := c.SetQuerySeterByURIParam(qs)
-		services.Log.Debug(fields)
+		qs, fields, subTotal, _ := c.SetQuerySeterByURIParam(qs)
 		total, err := qs.All(&serviceRecords)
 		if err != nil || total == 0 {
 			serviceRecords = []*models.ServiceRecord{}
 		}
 
 		if helpers.ContainsString(fields, "filter") {
-			total = int64(len(serviceRecords))
+			total = subTotal
 		} else {
 			total = int64(len(ids))
 		}
