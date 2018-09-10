@@ -75,8 +75,8 @@ func (c *ServiceRecordController) Post() {
 
 // Delete Delete
 func (c *ServiceRecordController) Delete() {
-	_, err := c.GetAuthUser()
-	if err != nil {
+	user, err := c.GetAuthUser()
+	if err != nil || user.Role == "public" {
 		c.Error(err)
 		return
 	}
@@ -162,8 +162,8 @@ func (c *ServiceRecordController) GetWithDayName() {
 
 // Put Put
 func (c *ServiceRecordController) Put() {
-	_, err := c.GetAuthUser()
-	if err != nil {
+	user, err := c.GetAuthUser()
+	if err != nil || user.Role == "public" {
 		c.Error(err)
 		return
 	}
