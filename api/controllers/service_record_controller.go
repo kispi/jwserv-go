@@ -64,6 +64,13 @@ func (c *ServiceRecordController) Post() {
 
 	serviceRecord.Congregation = user.Congregation
 	serviceRecord.Recorder = user
+
+	if models.GetModelQuerySeter(new(models.ServiceRecord), false).
+		Filter("congregation__id", serviceRecord.Congregation.ID).
+		Filter("area", serviceRecord.Area).
+		Exist() {
+
+	}
 	_, err = models.InsertModel(serviceRecord)
 	if err != nil {
 		c.Error(err)

@@ -73,12 +73,19 @@ func (c *AuthController) SignUp() {
 		return
 	}
 
+	role := "public"
+	if !models.GetModelQuerySeter(new(models.User), false).
+		Filter("congregation__id", congregationID).
+		Exist() {
+		role = "admin"
+	}
+
 	congregation := &models.Congregation{}
 	congregation.ID = congregationID
 	user := &models.User{
 		Email:        email,
 		Password:     string(hashedBytes[:]),
-		Role:         "public",
+		Role:         role,
 		Name:         name,
 		Congregation: congregation,
 	}
