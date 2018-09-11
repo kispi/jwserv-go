@@ -66,7 +66,7 @@ func (c *ServiceRecordController) Post() {
 	}
 
 	if c.existsOnSameDate(serviceRecord) {
-		c.Error(errors.New("RECORD_ALREADY_EXIST"))
+		c.Error(errors.New("RECORD_ALREADY_EXISTS"))
 		return
 	}
 
