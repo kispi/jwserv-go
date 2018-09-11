@@ -47,6 +47,9 @@ func (c *ServiceRecordController) Post() {
 		return
 	}
 
+	serviceRecord.Congregation = user.Congregation
+	serviceRecord.Recorder = user
+
 	if serviceRecord.Area == "" {
 		c.Error(errors.New("ERROR_MISSING_AREA"))
 		return
@@ -62,15 +65,11 @@ func (c *ServiceRecordController) Post() {
 		return
 	}
 
-	serviceRecord.Congregation = user.Congregation
-	serviceRecord.Recorder = user
-
-	if models.GetModelQuerySeter(new(models.ServiceRecord), false).
-		Filter("congregation__id", serviceRecord.Congregation.ID).
-		Filter("area", serviceRecord.Area).
-		Exist() {
-
+	if c.existsOnSameDate(serviceRecord) {
+		c.Error(errors.New("RECORD_ALREADY_EXIST"))
+		return
 	}
+
 	_, err = models.InsertModel(serviceRecord)
 	if err != nil {
 		c.Error(err)
@@ -189,4 +188,24 @@ func (c *ServiceRecordController) Put() {
 	}
 
 	c.Success(1, "success")
+}
+
+func (c *ServiceRecordController) existsOnSameDate(serviceRecord *models.ServiceRecord) bool {
+	type Result struct {
+		Count int64 `json:"count"`
+	}
+	result := &Result{}
+	start := serviceRecord.StartedAt.Format("2006-01-02")
+	o := orm.NewOrm()
+	q := "SELECT COUNT(*) AS count FROM service_records WHERE " +
+		"congregation_id = ? AND " +
+		"area = ? AND " +
+		"started_at >= ? AND started_at <= ? AND " +
+		"deleted_at IS NULL"
+	o.Raw(q,
+		serviceRecord.Congregation.ID,
+		serviceRecord.Area,
+		start+" 00:00:00", start+" 23:59:59").QueryRow(&result)
+
+	return result.Count > 0
 }
