@@ -202,9 +202,9 @@ func (c *BaseController) GetAuthUser() (*models.User, error) {
 			RelatedSel("User__Congregation").
 			One(authToken)
 		if err != nil {
-			return nil, errors.New("Invalid Apikey")
+			return nil, errors.New("INVALID_APIKEY")
 		}
 		return authToken.User, nil
 	}
-	return nil, errors.New("Invalid Apikey")
+	return nil, errors.New("INVALID_APIKEY")
 }

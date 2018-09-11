@@ -4,6 +4,8 @@ import (
 	"strconv"
 
 	"../models"
+	"../services"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // UserController UserController
@@ -59,7 +61,16 @@ func (c *UserController) Put() {
 		return
 	}
 
-	err = c.PutModel(user)
+	rawPassword := user.Password
+	hashedBytes, err := bcrypt.GenerateFromPassword([]byte(rawPassword), bcrypt.DefaultCost)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+	user.Password = string(hashedBytes[:])
+	services.Log.Debug(user.Password)
+
+	err = models.UpdateModel(user, []string{"phone", "password"})
 	if err != nil {
 		c.Error(err)
 		return
