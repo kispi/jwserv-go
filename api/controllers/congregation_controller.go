@@ -6,6 +6,7 @@ import (
 
 	"../core"
 	"../models"
+	"github.com/astaxie/beego/orm"
 )
 
 // CongregationController CongregationController
@@ -16,7 +17,7 @@ type CongregationController struct {
 // Get Get
 func (c *CongregationController) Get() {
 	congregations := []*models.Congregation{}
-	qs := core.GetModelQuerySeter(new(models.Congregation), true)
+	qs := core.GetModelQuerySeter(nil, new(models.Congregation), true)
 	qs, _, _, _ = c.SetQuerySeterByURIParam(qs)
 	qs.All(&congregations)
 
@@ -32,12 +33,12 @@ func (c *CongregationController) Post() {
 		return
 	}
 
-	if core.GetModelQuerySeter(new(models.Congregation), true).Filter("name", congregation.Name).Exist() {
+	if core.GetModelQuerySeter(nil, new(models.Congregation), true).Filter("name", congregation.Name).Exist() {
 		c.Error(errors.New("CONGREGATION_ALREADY_EXISTS"))
 		return
 	}
 
-	_, err = core.InsertModel(congregation)
+	_, err = core.InsertModel(nil, congregation)
 	if err != nil {
 		c.Error(err)
 		return
@@ -56,13 +57,13 @@ func (c *CongregationController) Delete() {
 	}
 
 	congregation := new(models.Congregation)
-	err = core.GetModelQuerySeter(new(models.Congregation), true).Filter("id", id).One(congregation)
+	err = core.GetModelQuerySeter(nil, new(models.Congregation), true).Filter("id", id).One(congregation)
 	if err != nil {
 		c.Error(err)
 		return
 	}
 
-	err = core.DeleteModel(congregation)
+	err = core.DeleteModel(nil, congregation)
 	if err != nil {
 		c.Error(err)
 		return
@@ -81,7 +82,7 @@ func (c *CongregationController) GetByID() {
 	}
 
 	congregation := new(models.Congregation)
-	err = core.GetModelQuerySeter(new(models.Congregation), true).Filter("id", id).One(congregation)
+	err = core.GetModelQuerySeter(nil, new(models.Congregation), true).Filter("id", id).One(congregation)
 	if err != nil {
 		c.Error(err)
 		return
@@ -99,7 +100,8 @@ func (c *CongregationController) Put() {
 		return
 	}
 
-	err = c.PutModel(congregation)
+	o := orm.NewOrm()
+	err = c.PutModel(o, congregation)
 	if err != nil {
 		c.Error(err)
 		return

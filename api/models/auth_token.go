@@ -50,7 +50,7 @@ func NewAuthToken(user *User) *AuthToken {
 // ValidateAuthToken - validates auth token
 func ValidateAuthToken(token string) (*AuthToken, error) {
 	authToken := &AuthToken{}
-	qs := core.GetModelQuerySeter(new(AuthToken), true)
+	qs := core.GetModelQuerySeter(nil, new(AuthToken), true)
 	err := qs.Filter("auth_token", token).Filter("user_id__deleted_at__isnull", true).One(authToken)
 	if err != nil {
 		return nil, nil

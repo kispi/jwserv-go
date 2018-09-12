@@ -1,10 +1,12 @@
 package controllers
 
 import (
+	"errors"
 	"strconv"
 
 	"../core"
 	"../models"
+	"github.com/astaxie/beego/orm"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -26,7 +28,7 @@ func (c *UserController) Me() {
 // Get Get
 func (c *UserController) Get() {
 	users := []*models.User{}
-	qs := core.GetModelQuerySeter(new(models.User), true)
+	qs := core.GetModelQuerySeter(nil, new(models.User), true)
 	qs, _, _, _ = c.SetQuerySeterByURIParam(qs)
 	qs.All(&users)
 
@@ -43,7 +45,7 @@ func (c *UserController) GetByID() {
 	}
 
 	user := new(models.User)
-	err = core.GetModelQuerySeter(new(models.User), true).Filter("id", id).One(user)
+	err = core.GetModelQuerySeter(nil, new(models.User), true).Filter("id", id).One(user)
 	if err != nil {
 		c.Error(err)
 		return
@@ -67,12 +69,25 @@ func (c *UserController) Put() {
 		c.Error(err)
 		return
 	}
+
+	o := orm.NewOrm()
+	core.TransBegin(o)
 	user.Password = string(hashedBytes[:])
-	err = core.UpdateModel(user, []string{"phone", "password", "role"})
+	err = core.UpdateModel(o, user, []string{"phone", "password", "role"})
 	if err != nil {
 		c.Error(err)
 		return
 	}
+
+	if !core.GetModelQuerySeter(nil, new(models.User), true).
+		Filter("congregation__id", user.Congregation.ID).
+		Filter("role", "admin").
+		Exist() {
+		core.TransRollback(o)
+		c.Error(errors.New("ADMIN_SHOULD_EXIST"))
+		return
+	}
+	core.TransCommit(o)
 
 	c.Success(1, "success")
 }
@@ -87,13 +102,13 @@ func (c *UserController) Delete() {
 	}
 
 	user := new(models.User)
-	err = core.GetModelQuerySeter(new(models.User), true).Filter("id", id).One(user)
+	err = core.GetModelQuerySeter(nil, new(models.User), true).Filter("id", id).One(user)
 	if err != nil {
 		c.Error(err)
 		return
 	}
 
-	err = core.DeleteModel(user)
+	err = core.DeleteModel(nil, user)
 	if err != nil {
 		c.Error(err)
 		return

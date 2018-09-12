@@ -25,7 +25,7 @@ func (c *ServiceRecordController) Get() {
 	}
 
 	serviceRecords := []*models.ServiceRecord{}
-	qs := core.GetModelQuerySeter(new(models.ServiceRecord), true)
+	qs := core.GetModelQuerySeter(nil, new(models.ServiceRecord), true)
 	qs = qs.Filter("congregation_id", user.Congregation.ID)
 	qs, _, subLimit, _ := c.SetQuerySeterByURIParam(qs)
 	qs.All(&serviceRecords)
@@ -71,7 +71,7 @@ func (c *ServiceRecordController) Post() {
 		return
 	}
 
-	_, err = core.InsertModel(serviceRecord)
+	_, err = core.InsertModel(nil, serviceRecord)
 	if err != nil {
 		c.Error(err)
 		return
@@ -96,13 +96,13 @@ func (c *ServiceRecordController) Delete() {
 	}
 
 	serviceRecord := new(models.ServiceRecord)
-	err = core.GetModelQuerySeter(new(models.ServiceRecord), true).Filter("id", id).One(serviceRecord)
+	err = core.GetModelQuerySeter(nil, new(models.ServiceRecord), true).Filter("id", id).One(serviceRecord)
 	if err != nil {
 		c.Error(err)
 		return
 	}
 
-	err = core.DeleteModel(serviceRecord)
+	err = core.DeleteModel(nil, serviceRecord)
 	if err != nil {
 		c.Error(err)
 		return
@@ -130,7 +130,7 @@ func (c *ServiceRecordController) GetWithDayName() {
 	serviceRecord := new(models.ServiceRecord)
 	serviceRecords := []*models.ServiceRecord{}
 	if urlParam == "id" {
-		err = core.GetModelQuerySeter(new(models.ServiceRecord), true).Filter("id", id).One(serviceRecord)
+		err = core.GetModelQuerySeter(nil, new(models.ServiceRecord), true).Filter("id", id).One(serviceRecord)
 		c.Success(1, serviceRecord)
 		return
 	} else if urlParam == "day" {
@@ -147,7 +147,7 @@ func (c *ServiceRecordController) GetWithDayName() {
 		for _, r := range serviceRecords {
 			ids = append(ids, r.ID)
 		}
-		qs := core.GetModelQuerySeter(new(models.ServiceRecord), true).Filter("id__in", ids)
+		qs := core.GetModelQuerySeter(nil, new(models.ServiceRecord), true).Filter("id__in", ids)
 		qs, fields, subTotal, _ := c.SetQuerySeterByURIParam(qs)
 		total, err := qs.All(&serviceRecords)
 		if err != nil || total == 0 {
@@ -182,7 +182,7 @@ func (c *ServiceRecordController) Put() {
 		return
 	}
 
-	err = c.PutModel(serviceRecord)
+	err = c.PutModel(nil, serviceRecord)
 	if err != nil {
 		c.Error(err)
 		return

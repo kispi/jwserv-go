@@ -25,8 +25,10 @@ func init() {
 }
 
 // InsertModel wrapper of NewOrm().Insert()
-func InsertModel(obj interface{}) (id int64, err error) {
-	o := orm.NewOrm()
+func InsertModel(o orm.Ormer, obj interface{}) (id int64, err error) {
+	if o == nil {
+		o = orm.NewOrm()
+	}
 	id, err = o.Insert(obj)
 
 	if err == nil {
@@ -38,8 +40,10 @@ func InsertModel(obj interface{}) (id int64, err error) {
 }
 
 // UpdateModel wrapper of NewOrm().Update()
-func UpdateModel(obj interface{}, keys []string) (err error) {
-	o := orm.NewOrm()
+func UpdateModel(o orm.Ormer, obj interface{}, keys []string) (err error) {
+	if o == nil {
+		o = orm.NewOrm()
+	}
 	_, err = o.Update(obj, keys...)
 
 	if err != nil {
@@ -49,17 +53,17 @@ func UpdateModel(obj interface{}, keys []string) (err error) {
 }
 
 // DeleteModel DeleteModel
-func DeleteModel(obj interface{}) (err error) {
+func DeleteModel(o orm.Ormer, obj interface{}) (err error) {
 	if !UseSoftDelete {
-		err = HardDeleteModel(obj)
+		err = HardDeleteModel(o, obj)
 	} else {
-		err = SoftDeleteModel(obj)
+		err = SoftDeleteModel(o, obj)
 	}
 	return
 }
 
 // SoftDeleteModel mark deleted_at instead of really deletes it.
-func SoftDeleteModel(m interface{}) (err error) {
+func SoftDeleteModel(o orm.Ormer, m interface{}) (err error) {
 	field := reflect.ValueOf(m).Elem().FieldByName("DeleteAt")
 	if field.IsValid() {
 		now := time.Now()
@@ -69,13 +73,15 @@ func SoftDeleteModel(m interface{}) (err error) {
 			field.Set(reflect.ValueOf(now))
 		}
 	}
-	err = UpdateModel(m, []string{"deleted_at"})
+	err = UpdateModel(o, m, []string{"deleted_at"})
 	return
 }
 
 // HardDeleteModel really deletes data.
-func HardDeleteModel(m interface{}) (err error) {
-	o := orm.NewOrm()
+func HardDeleteModel(o orm.Ormer, m interface{}) (err error) {
+	if o == nil {
+		o = orm.NewOrm()
+	}
 	if _, err := o.Delete(m); err != nil {
 		return err
 	}
@@ -83,9 +89,11 @@ func HardDeleteModel(m interface{}) (err error) {
 }
 
 // GetModelQuerySeter GetModelQuerySeter
-func GetModelQuerySeter(m interface{}, loadRelated bool) (qs orm.QuerySeter) {
+func GetModelQuerySeter(o orm.Ormer, m interface{}, loadRelated bool) (qs orm.QuerySeter) {
 	adapter := m.(ModelAdapter)
-	o := orm.NewOrm()
+	if o == nil {
+		o = orm.NewOrm()
+	}
 	qs = o.QueryTable(adapter.TableName())
 
 	qs = ApplyCommonFilter(qs)
@@ -100,4 +108,22 @@ func GetModelQuerySeter(m interface{}, loadRelated bool) (qs orm.QuerySeter) {
 func ApplyCommonFilter(qs orm.QuerySeter) orm.QuerySeter {
 	qs = qs.Filter("deleted_at__isnull", true)
 	return qs
+}
+
+// TransBegin Begin transaction
+func TransBegin(o orm.Ormer) error {
+	err := o.Begin()
+	return err
+}
+
+// TransRollback Rollback transaction
+func TransRollback(o orm.Ormer) error {
+	err := o.Rollback()
+	return err
+}
+
+// TransCommit Commit transaction
+func TransCommit(o orm.Ormer) error {
+	err := o.Commit()
+	return err
 }

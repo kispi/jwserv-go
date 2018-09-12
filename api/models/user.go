@@ -33,17 +33,17 @@ func init() {
 // RenewAuthToken - renews auth token
 func (t *User) RenewAuthToken() (*AuthToken, error) {
 	authToken := &AuthToken{}
-	qs := core.GetModelQuerySeter(new(AuthToken), true)
+	qs := core.GetModelQuerySeter(nil, new(AuthToken), true)
 	err := qs.Filter("user_id__id", t.ID).One(authToken)
 	if err != nil {
 		authToken = NewAuthToken(t)
-		_, err = core.InsertModel(authToken)
+		_, err = core.InsertModel(nil, authToken)
 		if err != nil {
 			return nil, err
 		}
 	} else {
 		authToken.LastLogin = time.Now()
-		err = core.UpdateModel(authToken, []string{"last_login"})
+		err = core.UpdateModel(nil, authToken, []string{"last_login"})
 		if err != nil {
 			return nil, err
 		}

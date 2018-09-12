@@ -147,7 +147,7 @@ func parseFilters(qs orm.QuerySeter, filter string) (orm.QuerySeter, error) {
 }
 
 // PutModel PutModel
-func (c *BaseController) PutModel(m interface{}) (err error) {
+func (c *BaseController) PutModel(o orm.Ormer, m interface{}) (err error) {
 	idStr := c.Ctx.Input.Param(":id")
 	if idStr != "" && idStr != "0" {
 		id, _ := strconv.ParseInt(idStr, 10, 64)
@@ -163,7 +163,7 @@ func (c *BaseController) PutModel(m interface{}) (err error) {
 		}
 
 		keys := c.GetInputKeys(vInt)
-		err = core.UpdateModel(vInt, keys)
+		err = core.UpdateModel(o, vInt, keys)
 	} else {
 		err = errors.New("URL parameter /:id is not given")
 	}
@@ -197,7 +197,7 @@ func (c *BaseController) GetAuthUser() (*models.User, error) {
 	apikey := c.Ctx.Input.Header("apikey")
 	if apikey != "" {
 		authToken := new(models.AuthToken)
-		err := core.GetModelQuerySeter(authToken, false).
+		err := core.GetModelQuerySeter(nil, authToken, false).
 			Filter("auth_token", apikey).
 			RelatedSel("User").
 			RelatedSel("User__Congregation").
