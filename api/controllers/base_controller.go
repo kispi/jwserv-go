@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"../constants"
+	"../core"
 	"../helpers"
 	"../models"
 
@@ -162,7 +163,7 @@ func (c *BaseController) PutModel(m interface{}) (err error) {
 		}
 
 		keys := c.GetInputKeys(vInt)
-		err = models.UpdateModel(vInt, keys)
+		err = core.UpdateModel(vInt, keys)
 	} else {
 		err = errors.New("URL parameter /:id is not given")
 	}
@@ -196,7 +197,7 @@ func (c *BaseController) GetAuthUser() (*models.User, error) {
 	apikey := c.Ctx.Input.Header("apikey")
 	if apikey != "" {
 		authToken := new(models.AuthToken)
-		err := models.GetModelQuerySeter(authToken, false).
+		err := core.GetModelQuerySeter(authToken, false).
 			Filter("auth_token", apikey).
 			RelatedSel("User").
 			RelatedSel("User__Congregation").

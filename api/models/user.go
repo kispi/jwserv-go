@@ -3,6 +3,7 @@ package models
 import (
 	"time"
 
+	"../core"
 	"github.com/astaxie/beego/orm"
 )
 
@@ -32,17 +33,17 @@ func init() {
 // RenewAuthToken - renews auth token
 func (t *User) RenewAuthToken() (*AuthToken, error) {
 	authToken := &AuthToken{}
-	qs := GetModelQuerySeter(new(AuthToken), true)
+	qs := core.GetModelQuerySeter(new(AuthToken), true)
 	err := qs.Filter("user_id__id", t.ID).One(authToken)
 	if err != nil {
 		authToken = NewAuthToken(t)
-		_, err = InsertModel(authToken)
+		_, err = core.InsertModel(authToken)
 		if err != nil {
 			return nil, err
 		}
 	} else {
 		authToken.LastLogin = time.Now()
-		err = UpdateModel(authToken, []string{"last_login"})
+		err = core.UpdateModel(authToken, []string{"last_login"})
 		if err != nil {
 			return nil, err
 		}

@@ -10,7 +10,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/joho/godotenv"
 
-	"./services"
+	"./core"
 )
 
 // DB DB
@@ -68,7 +68,7 @@ func init() {
 	setRequestAndResponse()
 	orm.RegisterDriver("mysql", orm.DRMySQL)
 	orm.RegisterDataBase("default", "mysql", User+":"+Pass+"@tcp("+Host+":"+Port+")/"+Name+"?charset=utf8mb4&sql_mode=TRADITIONAL")
-	services.InitLogger()
+	core.InitLogger()
 }
 
 func main() {

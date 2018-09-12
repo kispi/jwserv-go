@@ -3,8 +3,8 @@ package controllers
 import (
 	"strconv"
 
+	"../core"
 	"../models"
-	"../services"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -26,7 +26,7 @@ func (c *UserController) Me() {
 // Get Get
 func (c *UserController) Get() {
 	users := []*models.User{}
-	qs := models.GetModelQuerySeter(new(models.User), true)
+	qs := core.GetModelQuerySeter(new(models.User), true)
 	qs, _, _, _ = c.SetQuerySeterByURIParam(qs)
 	qs.All(&users)
 
@@ -43,7 +43,7 @@ func (c *UserController) GetByID() {
 	}
 
 	user := new(models.User)
-	err = models.GetModelQuerySeter(new(models.User), true).Filter("id", id).One(user)
+	err = core.GetModelQuerySeter(new(models.User), true).Filter("id", id).One(user)
 	if err != nil {
 		c.Error(err)
 		return
@@ -68,9 +68,7 @@ func (c *UserController) Put() {
 		return
 	}
 	user.Password = string(hashedBytes[:])
-	services.Log.Debug(user.Password)
-
-	err = models.UpdateModel(user, []string{"phone", "password"})
+	err = core.UpdateModel(user, []string{"phone", "password", "role"})
 	if err != nil {
 		c.Error(err)
 		return
@@ -89,13 +87,13 @@ func (c *UserController) Delete() {
 	}
 
 	user := new(models.User)
-	err = models.GetModelQuerySeter(new(models.User), true).Filter("id", id).One(user)
+	err = core.GetModelQuerySeter(new(models.User), true).Filter("id", id).One(user)
 	if err != nil {
 		c.Error(err)
 		return
 	}
 
-	err = models.DeleteModel(user)
+	err = core.DeleteModel(user)
 	if err != nil {
 		c.Error(err)
 		return

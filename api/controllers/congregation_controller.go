@@ -4,6 +4,7 @@ import (
 	"errors"
 	"strconv"
 
+	"../core"
 	"../models"
 )
 
@@ -15,7 +16,7 @@ type CongregationController struct {
 // Get Get
 func (c *CongregationController) Get() {
 	congregations := []*models.Congregation{}
-	qs := models.GetModelQuerySeter(new(models.Congregation), true)
+	qs := core.GetModelQuerySeter(new(models.Congregation), true)
 	qs, _, _, _ = c.SetQuerySeterByURIParam(qs)
 	qs.All(&congregations)
 
@@ -31,12 +32,12 @@ func (c *CongregationController) Post() {
 		return
 	}
 
-	if models.GetModelQuerySeter(new(models.Congregation), true).Filter("name", congregation.Name).Exist() {
+	if core.GetModelQuerySeter(new(models.Congregation), true).Filter("name", congregation.Name).Exist() {
 		c.Error(errors.New("CONGREGATION_ALREADY_EXISTS"))
 		return
 	}
 
-	_, err = models.InsertModel(congregation)
+	_, err = core.InsertModel(congregation)
 	if err != nil {
 		c.Error(err)
 		return
@@ -55,13 +56,13 @@ func (c *CongregationController) Delete() {
 	}
 
 	congregation := new(models.Congregation)
-	err = models.GetModelQuerySeter(new(models.Congregation), true).Filter("id", id).One(congregation)
+	err = core.GetModelQuerySeter(new(models.Congregation), true).Filter("id", id).One(congregation)
 	if err != nil {
 		c.Error(err)
 		return
 	}
 
-	err = models.DeleteModel(congregation)
+	err = core.DeleteModel(congregation)
 	if err != nil {
 		c.Error(err)
 		return
@@ -80,7 +81,7 @@ func (c *CongregationController) GetByID() {
 	}
 
 	congregation := new(models.Congregation)
-	err = models.GetModelQuerySeter(new(models.Congregation), true).Filter("id", id).One(congregation)
+	err = core.GetModelQuerySeter(new(models.Congregation), true).Filter("id", id).One(congregation)
 	if err != nil {
 		c.Error(err)
 		return

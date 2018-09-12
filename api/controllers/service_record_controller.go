@@ -6,6 +6,7 @@ import (
 
 	"github.com/astaxie/beego/orm"
 
+	"../core"
 	"../helpers"
 	"../models"
 )
@@ -24,7 +25,7 @@ func (c *ServiceRecordController) Get() {
 	}
 
 	serviceRecords := []*models.ServiceRecord{}
-	qs := models.GetModelQuerySeter(new(models.ServiceRecord), true)
+	qs := core.GetModelQuerySeter(new(models.ServiceRecord), true)
 	qs = qs.Filter("congregation_id", user.Congregation.ID)
 	qs, _, subLimit, _ := c.SetQuerySeterByURIParam(qs)
 	qs.All(&serviceRecords)
@@ -70,7 +71,7 @@ func (c *ServiceRecordController) Post() {
 		return
 	}
 
-	_, err = models.InsertModel(serviceRecord)
+	_, err = core.InsertModel(serviceRecord)
 	if err != nil {
 		c.Error(err)
 		return
@@ -95,13 +96,13 @@ func (c *ServiceRecordController) Delete() {
 	}
 
 	serviceRecord := new(models.ServiceRecord)
-	err = models.GetModelQuerySeter(new(models.ServiceRecord), true).Filter("id", id).One(serviceRecord)
+	err = core.GetModelQuerySeter(new(models.ServiceRecord), true).Filter("id", id).One(serviceRecord)
 	if err != nil {
 		c.Error(err)
 		return
 	}
 
-	err = models.DeleteModel(serviceRecord)
+	err = core.DeleteModel(serviceRecord)
 	if err != nil {
 		c.Error(err)
 		return
@@ -129,7 +130,7 @@ func (c *ServiceRecordController) GetWithDayName() {
 	serviceRecord := new(models.ServiceRecord)
 	serviceRecords := []*models.ServiceRecord{}
 	if urlParam == "id" {
-		err = models.GetModelQuerySeter(new(models.ServiceRecord), true).Filter("id", id).One(serviceRecord)
+		err = core.GetModelQuerySeter(new(models.ServiceRecord), true).Filter("id", id).One(serviceRecord)
 		c.Success(1, serviceRecord)
 		return
 	} else if urlParam == "day" {
@@ -146,7 +147,7 @@ func (c *ServiceRecordController) GetWithDayName() {
 		for _, r := range serviceRecords {
 			ids = append(ids, r.ID)
 		}
-		qs := models.GetModelQuerySeter(new(models.ServiceRecord), true).Filter("id__in", ids)
+		qs := core.GetModelQuerySeter(new(models.ServiceRecord), true).Filter("id__in", ids)
 		qs, fields, subTotal, _ := c.SetQuerySeterByURIParam(qs)
 		total, err := qs.All(&serviceRecords)
 		if err != nil || total == 0 {

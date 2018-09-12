@@ -4,6 +4,7 @@ import (
 	"errors"
 	"time"
 
+	"../core"
 	"../models"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -63,7 +64,7 @@ func (c *AuthController) SignUp() {
 	}
 	phone, err := json.Get("phone").String()
 
-	if models.GetModelQuerySeter(new(models.User), false).Filter("email", email).Exist() {
+	if core.GetModelQuerySeter(new(models.User), false).Filter("email", email).Exist() {
 		c.Error(errors.New("ERROR_EMAIL_ALREADY_EXISTS"))
 		return
 	}
@@ -75,7 +76,7 @@ func (c *AuthController) SignUp() {
 	}
 
 	role := "public"
-	if !models.GetModelQuerySeter(new(models.User), false).
+	if !core.GetModelQuerySeter(new(models.User), false).
 		Filter("congregation__id", congregationID).
 		Exist() {
 		role = "admin"
@@ -94,7 +95,7 @@ func (c *AuthController) SignUp() {
 		user.Phone = phone
 	}
 
-	if _, err = models.InsertModel(user); err != nil {
+	if _, err = core.InsertModel(user); err != nil {
 		c.Error(err)
 		return
 	}
@@ -113,7 +114,7 @@ func (c *AuthController) signInWithCreds(cred map[string]string) {
 		} else {
 			now := time.Now()
 			authUser.LastActivity = &now
-			models.UpdateModel(authUser, []string{"last_activity"})
+			core.UpdateModel(authUser, []string{"last_activity"})
 			c.Success(1, authToken)
 		}
 	}
@@ -124,7 +125,7 @@ func AuthCheckLoginCallback(cred map[string]string) (*models.User, error) {
 	signInType := cred["type"]
 	if signInType == "local" {
 		user := new(models.User)
-		if err := models.GetModelQuerySeter(user, false).Filter("email", cred["email"]).One(user); err == nil {
+		if err := core.GetModelQuerySeter(user, false).Filter("email", cred["email"]).One(user); err == nil {
 			dbPassword := []byte(user.Password)
 			rawPassword := []byte(cred["password"])
 
