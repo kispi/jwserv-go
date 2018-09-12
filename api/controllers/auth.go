@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"errors"
+	"time"
 
 	"../models"
 	"golang.org/x/crypto/bcrypt"
@@ -110,6 +111,9 @@ func (c *AuthController) signInWithCreds(cred map[string]string) {
 		if authToken, err = authUser.RenewAuthToken(); err != nil {
 			c.Error(err)
 		} else {
+			now := time.Now()
+			authUser.LastActivity = &now
+			models.UpdateModel(authUser, []string{"last_activity"})
 			c.Success(1, authToken)
 		}
 	}
