@@ -73,22 +73,22 @@ func (c *UserController) Put() {
 	o := orm.NewOrm()
 	core.TransBegin(o)
 	user.Password = string(hashedBytes[:])
-	err = core.UpdateModel(o, user, []string{"phone", "password", "role"})
+	err = core.UpdateModel(o, user, []string{"password", "phone", "role"})
 	if err != nil {
+		core.TransRollback(o)
 		c.Error(err)
 		return
 	}
 
-	if !core.GetModelQuerySeter(nil, new(models.User), true).
+	if !core.GetModelQuerySeter(o, new(models.User), true).
 		Filter("congregation__id", user.Congregation.ID).
 		Filter("role", "admin").
 		Exist() {
 		core.TransRollback(o)
-		c.Error(errors.New("ADMIN_SHOULD_EXIST"))
+		c.Error(errors.New("ERROR_NEEDS_ADMIN"))
 		return
 	}
 	core.TransCommit(o)
-
 	c.Success(1, "success")
 }
 
