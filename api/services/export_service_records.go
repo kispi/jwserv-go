@@ -1,9 +1,9 @@
 package services
 
 import (
-	"io"
 	"sort"
 	"strconv"
+	"time"
 
 	"../constants"
 	"../core"
@@ -37,37 +37,54 @@ const (
 )
 
 // ExportServiceRecords exports service records
-func Export(csvService *CSVService, serviceRecords []*models.ServiceRecord, writer io.Writer, fileName string) ([]byte, error) {
-	s := new(ExportServiceRecords)
-
-	csv, err := csvService.NewCSV(fileName, writer)
+func Export(serviceRecords []*models.ServiceRecord) (string, []byte, error) {
+	var csvService CSVService
+	fileName := "Area_" + time.Now().Format("2006-01-02_15_04_05") + ".csv"
+	csv, err := csvService.NewCSV(fileName)
 	if err != nil {
-		return nil, err
+		core.Log.Warning(err)
+		return "", nil, err
 	}
+
 	core.Log.Debug("Export Started")
-	err = s.populate(csv, serviceRecords)
+	err = populate(csv, serviceRecords)
 	if err != nil {
-		return nil, err
+		core.Log.Warning(err)
+		return "", nil, err
 	}
 	core.Log.Debug("Export Done")
 
 	fileAsByte, err := csv.SaveFileAsBytes()
 	if err != nil {
-		return nil, err
+		core.Log.Warning(err)
+		return "", nil, err
 	}
 
-	return fileAsByte, nil
+	return fileName, fileAsByte, nil
 }
 
-func (s *ExportServiceRecords) populate(csv *CSVService, serviceRecords []*models.ServiceRecord) error {
+func populate(csv *CSVService, serviceRecords []*models.ServiceRecord) error {
 	sortedRecords := groupByArea(serviceRecords)
-	pages := generatePages(csv, sortedRecords)
-	for _, page := range pages {
-		for _, row := range page {
-			csv.AddRow(row)
+	for _, r := range sortedRecords {
+		core.Log.Debug(r.Area)
+		for _, record := range r.Records {
+			core.Log.Debug(record.LeaderName, record.StartedAt, record.EndedAt)
 		}
 	}
+
+	pages := generatePages(csv, sortedRecords)
+	for _, page := range pages {
+		csv.AddRows(page)
+	}
 	return nil
+}
+
+func retrieveOrNil(records []*models.ServiceRecord, i int) *models.ServiceRecord {
+	defer func() *models.ServiceRecord {
+		recover()
+		return nil
+	}()
+	return records[i]
 }
 
 func createPage(areasAndRecords []*AreaAndRecords) (page [][]string) {
@@ -83,26 +100,27 @@ func createPage(areasAndRecords []*AreaAndRecords) (page [][]string) {
 		for _, areaAndRecords := range areasAndRecords {
 			var row []string
 			// Add LeaderName
-			for _, r := range areaAndRecords.Records {
+			r := retrieveOrNil(areaAndRecords.Records, i)
+			if r != nil {
 				row = append(row, r.LeaderName)
+			} else {
 				row = append(row, "")
 			}
+			row = append(row, "")
 			page = append(page, row)
 
 			row = []string{}
 			// Add StartedAt, EndedAt
-			for _, r := range areaAndRecords.Records {
-				var startedAt, endedAt string
-
+			if r != nil {
 				if r.StartedAt != nil {
-					startedAt = r.StartedAt.Format(constants.DBTimeFormatDateOnly)
+					row = append(row, r.StartedAt.Format(constants.DBTimeFormatDateOnly))
 				}
-				row = append(row, startedAt)
-
 				if r.EndedAt != nil {
-					endedAt = r.EndedAt.Format(constants.DBTimeFormatDateOnly)
+					row = append(row, r.EndedAt.Format(constants.DBTimeFormatDateOnly))
 				}
-				row = append(row, endedAt)
+			} else {
+				row = append(row, "")
+				row = append(row, "")
 			}
 			page = append(page, row)
 		}
@@ -140,9 +158,11 @@ func groupByArea(serviceRecords []*models.ServiceRecord) (records []*AreaAndReco
 
 	sort.Sort(areas)
 	for _, area := range areas {
+		groupedSlice := models.ServiceRecordSlice(grouped[string(area)])
+		sort.Sort(groupedSlice)
 		record := &AreaAndRecords{
 			Area:    string(area),
-			Records: grouped[string(area)],
+			Records: groupedSlice,
 		}
 		records = append(records, record)
 	}

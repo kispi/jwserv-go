@@ -61,6 +61,11 @@ func (c *BaseController) ParseJSONBody() (json *simplejson.Json, err error) {
 	return json, nil
 }
 
+// GetURLQueryParam GetURLQueryParam
+func (c *BaseController) GetURLQueryParam(key string) string {
+	return c.Ctx.Request.URL.Query().Get(key)
+}
+
 // SetQuerySeterByURIParam SetQuerySeterByURIParam
 func (c *BaseController) SetQuerySeterByURIParam(qs orm.QuerySeter) (orm.QuerySeter, []string, int64, error) {
 	fields := make(map[string]int64)

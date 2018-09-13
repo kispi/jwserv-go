@@ -27,7 +27,7 @@ func init() {
 		beego.NSRouter("/congregations", congregationController, "get:Get;post:Post"),
 		beego.NSRouter("/congregations/:id", congregationController, "get:GetByID;put:Put;delete:Delete"),
 
-		beego.NSRouter("/export/serviceRecords", exportController, "post:ExportServiceRecords"),
+		beego.NSRouter("/export/serviceRecords", exportController, "get:ExportServiceRecords"),
 	)
 
 	beego.AddNamespace(ns)

@@ -3,6 +3,8 @@ package models
 import (
 	"time"
 
+	"../constants"
+
 	"github.com/astaxie/beego/orm"
 )
 
@@ -17,6 +19,14 @@ type ServiceRecord struct {
 	LeaderName   string        `orm:"column(leader_name)" json:"leaderName,omitempty"`
 	Recorder     *User         `orm:"column(recorder_id);rel(fk)" json:"recorder,omitempty"`
 	Memo         string        `orm:"column(memo)" json:"memo,omitempty"`
+}
+
+type ServiceRecordSlice []*ServiceRecord
+
+func (s ServiceRecordSlice) Len() int      { return len(s) }
+func (s ServiceRecordSlice) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
+func (s ServiceRecordSlice) Less(i, j int) bool {
+	return s[i].StartedAt.Format(constants.DBTimeFormat) < s[j].StartedAt.Format(constants.DBTimeFormat)
 }
 
 // TableName TableName
