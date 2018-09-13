@@ -11,6 +11,7 @@ func init() {
 	userController := &controllers.UserController{}
 	serviceRecordController := &controllers.ServiceRecordController{}
 	congregationController := &controllers.CongregationController{}
+	exportController := &controllers.ExportController{}
 
 	ns := beego.NewNamespace("/v1",
 		beego.NSRouter("/signUpLocal", authController, "post:SignUp"),
@@ -25,6 +26,8 @@ func init() {
 
 		beego.NSRouter("/congregations", congregationController, "get:Get;post:Post"),
 		beego.NSRouter("/congregations/:id", congregationController, "get:GetByID;put:Put;delete:Delete"),
+
+		beego.NSRouter("/export/serviceRecords", exportController, "post:ExportServiceRecords"),
 	)
 
 	beego.AddNamespace(ns)

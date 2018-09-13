@@ -38,6 +38,7 @@ func (c *BaseController) Success(total int64, data interface{}) {
 
 // Failed Failed
 func (c *BaseController) Error(err error) {
+	core.Log.Error(err)
 	c.Ctx.ResponseWriter.WriteHeader(500)
 	c.Ctx.ResponseWriter.Write([]byte(err.Error()))
 }

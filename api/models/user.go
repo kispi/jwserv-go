@@ -30,6 +30,11 @@ func init() {
 	orm.RegisterModel(new(User))
 }
 
+func (t *User) LoadCongregation() {
+	o := orm.NewOrm()
+	o.LoadRelated(t, "Congregation", 0)
+}
+
 // RenewAuthToken - renews auth token
 func (t *User) RenewAuthToken() (*AuthToken, error) {
 	authToken := &AuthToken{}
