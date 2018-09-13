@@ -96,9 +96,9 @@ func createPage(areasAndRecords []*AreaAndRecords) (page [][]string) {
 	}
 	page = append(page, row)
 
-	for i := 1; i < dataPerPage; i++ {
+	for i := 0; i < dataPerPage; i++ {
+		var row []string
 		for _, areaAndRecords := range areasAndRecords {
-			var row []string
 			// Add LeaderName
 			r := retrieveOrNil(areaAndRecords.Records, i)
 			if r != nil {
@@ -107,10 +107,13 @@ func createPage(areasAndRecords []*AreaAndRecords) (page [][]string) {
 				row = append(row, "")
 			}
 			row = append(row, "")
-			page = append(page, row)
+		}
+		page = append(page, row)
 
-			row = []string{}
+		row = []string{}
+		for _, areaAndRecords := range areasAndRecords {
 			// Add StartedAt, EndedAt
+			r := retrieveOrNil(areaAndRecords.Records, i)
 			if r != nil {
 				if r.StartedAt != nil {
 					row = append(row, r.StartedAt.Format(constants.DBTimeFormatDateOnly))
@@ -122,8 +125,8 @@ func createPage(areasAndRecords []*AreaAndRecords) (page [][]string) {
 				row = append(row, "")
 				row = append(row, "")
 			}
-			page = append(page, row)
 		}
+		page = append(page, row)
 	}
 	return
 }
