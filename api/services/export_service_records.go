@@ -65,13 +65,6 @@ func Export(serviceRecords []*models.ServiceRecord) (string, []byte, error) {
 
 func populate(csv *CSVService, serviceRecords []*models.ServiceRecord) error {
 	sortedRecords := groupByArea(serviceRecords)
-	for _, r := range sortedRecords {
-		core.Log.Debug(r.Area)
-		for _, record := range r.Records {
-			core.Log.Debug(record.LeaderName, record.StartedAt, record.EndedAt)
-		}
-	}
-
 	pages := generatePages(csv, sortedRecords)
 	for _, page := range pages {
 		csv.AddRows(page)

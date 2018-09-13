@@ -37,7 +37,7 @@ func (c *ExportController) ExportServiceRecords() {
 	}
 
 	c.Ctx.ResponseWriter.Header().Set("Content-Description", "File Transfer")
-	c.Ctx.ResponseWriter.Header().Set("Content-Type", "text/csv")
+	c.Ctx.ResponseWriter.Header().Set("Content-Type", "text/csv; charset=UTF-8")
 	c.Ctx.ResponseWriter.Header().Set("Content-Disposition", "attachment; filename="+fileName)
 	_, err = c.Ctx.ResponseWriter.Write(fileAsByte)
 	if err != nil {
