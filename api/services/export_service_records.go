@@ -3,10 +3,8 @@ package services
 import (
 	"sort"
 	"strconv"
-	"time"
 
 	"../constants"
-	"../core"
 	"../models"
 )
 
@@ -14,7 +12,6 @@ type AreaAndRecords struct {
 	Area    string
 	Records []*models.ServiceRecord
 }
-type ExportServiceRecords struct{}
 type MyString string
 type MyStringSlice []MyString
 
@@ -35,42 +32,6 @@ const (
 	dataPerPage  = 25
 	areasPerPage = 5
 )
-
-// ExportServiceRecords exports service records
-func Export(serviceRecords []*models.ServiceRecord) (string, []byte, error) {
-	var csvService CSVService
-	fileName := "Area_" + time.Now().Format("2006-01-02_15_04_05") + ".csv"
-	csv, err := csvService.NewCSV(fileName)
-	if err != nil {
-		core.Log.Warning(err)
-		return "", nil, err
-	}
-
-	core.Log.Debug("Export Started")
-	err = populate(csv, serviceRecords)
-	if err != nil {
-		core.Log.Warning(err)
-		return "", nil, err
-	}
-	core.Log.Debug("Export Done")
-
-	fileAsByte, err := csv.SaveFileAsBytes()
-	if err != nil {
-		core.Log.Warning(err)
-		return "", nil, err
-	}
-
-	return fileName, fileAsByte, nil
-}
-
-func populate(csv *CSVService, serviceRecords []*models.ServiceRecord) error {
-	sortedRecords := groupByArea(serviceRecords)
-	pages := generatePages(csv, sortedRecords)
-	for _, page := range pages {
-		csv.AddRows(page)
-	}
-	return nil
-}
 
 func retrieveOrNil(records []*models.ServiceRecord, i int) *models.ServiceRecord {
 	defer func() *models.ServiceRecord {
@@ -124,7 +85,7 @@ func createPage(areasAndRecords []*AreaAndRecords) (page [][]string) {
 	return
 }
 
-func generatePages(csv *CSVService, areasAndRecords []*AreaAndRecords) [][][]string {
+func GeneratePages(areasAndRecords []*AreaAndRecords) [][][]string {
 	var pages [][][]string
 	totalPages := len(areasAndRecords)/areasPerPage + 1
 	for i := 0; i < totalPages; i++ {
@@ -139,7 +100,7 @@ func generatePages(csv *CSVService, areasAndRecords []*AreaAndRecords) [][][]str
 	return pages
 }
 
-func groupByArea(serviceRecords []*models.ServiceRecord) (records []*AreaAndRecords) {
+func GroupByArea(serviceRecords []*models.ServiceRecord) (records []*AreaAndRecords) {
 	areasMap := make(map[string]bool)
 	areas := MyStringSlice{}
 	grouped := make(map[string][]*models.ServiceRecord)

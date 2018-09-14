@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"time"
+
 	"../core"
 	"../models"
 	"../services"
@@ -30,15 +32,30 @@ func (c *ExportController) ExportServiceRecords() {
 		Limit(-1).
 		All(&serviceRecords)
 
-	fileName, fileAsByte, err := services.Export(serviceRecords)
+	sortedRecords := services.GroupByArea(serviceRecords)
+	c.Success(1, sortedRecords)
+	// pages := services.GeneratePages(sortedRecords)
+	// c.responseAsCSV(result)
+}
+
+func (c *ExportController) responseAsCSV(pages [][][]string) {
+	var csvService services.CSVService
+	fileName := "Area_" + time.Now().Format("2006-01-02_15_04_05") + ".csv"
+	csv, err := csvService.NewCSV(fileName)
 	if err != nil {
-		c.Error(err)
+		core.Log.Error(err)
 		return
 	}
-
+	for _, page := range pages {
+		csv.AddRows(page)
+	}
+	fileAsByte, err := csv.SaveFileAsBytes()
+	if err != nil {
+		core.Log.Error(err)
+		return
+	}
 	c.Ctx.ResponseWriter.Header().Set("Content-Description", "File Transfer")
 	c.Ctx.ResponseWriter.Header().Set("Content-Type", "text/csv; charset=UTF-8")
-	c.Ctx.ResponseWriter.Header().Set("Content-Disposition", "attachment; filename="+fileName)
 	_, err = c.Ctx.ResponseWriter.Write(fileAsByte)
 	if err != nil {
 		c.Error(err)
