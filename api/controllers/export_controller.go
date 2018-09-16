@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"errors"
+	"strings"
 	"time"
 
 	"../core"
@@ -24,7 +26,8 @@ func (c *ExportController) ExportServiceRecords() {
 	all := c.GetURLQueryParam("all")
 	start := c.GetURLQueryParam("start")
 	end := c.GetURLQueryParam("end")
-	core.Log.Debug(all, start, end)
+	exportType := c.GetURLQueryParam("exportType")
+	core.Log.Debug(all, start, end, exportType)
 
 	serviceRecords := []*models.ServiceRecord{}
 	core.GetModelQuerySeter(nil, new(models.ServiceRecord), false).
@@ -33,9 +36,19 @@ func (c *ExportController) ExportServiceRecords() {
 		All(&serviceRecords)
 
 	sortedRecords := services.GroupByArea(serviceRecords)
-	c.Success(1, sortedRecords)
-	// pages := services.GeneratePages(sortedRecords)
-	// c.responseAsCSV(result)
+	pages := services.GeneratePages(sortedRecords)
+	switch strings.ToLower(exportType) {
+	case "html":
+		c.Success(1, pages)
+		return
+	case "csv":
+		c.responseAsCSV(pages)
+		return
+	case "excel":
+		c.responseAsCSV(pages)
+		return
+	}
+	c.Error(errors.New("UNEXPECTED_EXPORT_TYPE"))
 }
 
 func (c *ExportController) responseAsCSV(pages [][][]string) {

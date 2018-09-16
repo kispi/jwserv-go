@@ -29,7 +29,7 @@ func (s MyStringSlice) Len() int      { return len(s) }
 func (s MyStringSlice) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
 
 const (
-	dataPerPage  = 25
+	dataPerPage  = 21
 	areasPerPage = 5
 )
 
