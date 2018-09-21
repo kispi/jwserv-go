@@ -29,7 +29,7 @@ func (s MyStringSlice) Len() int      { return len(s) }
 func (s MyStringSlice) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
 
 const (
-	dataPerPage  = 21
+	dataPerPage  = 23
 	areasPerPage = 5
 )
 
@@ -71,9 +71,13 @@ func createPage(areasAndRecords []*AreaAndRecords) (page [][]string) {
 			if r != nil {
 				if r.StartedAt != nil {
 					row = append(row, r.StartedAt.Format(constants.DBTimeFormatDateOnly))
+				} else {
+					row = append(row, "")
 				}
 				if r.EndedAt != nil {
 					row = append(row, r.EndedAt.Format(constants.DBTimeFormatDateOnly))
+				} else {
+					row = append(row, "")
 				}
 			} else {
 				row = append(row, "")
