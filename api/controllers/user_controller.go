@@ -62,28 +62,36 @@ func (c *UserController) Put() {
 		c.Error(err)
 		return
 	}
-
 	rawPassword := user.Password
 	hashedBytes, err := bcrypt.GenerateFromPassword([]byte(rawPassword), bcrypt.DefaultCost)
 	if err != nil {
 		c.Error(err)
 		return
 	}
+	user.Password = string(hashedBytes[:])
 
+	existingUser := new(models.User)
+	if err := core.GetModelQuerySeter(nil, user, false).RelatedSel("Congregation").Filter("id", user.ID).One(existingUser); err != nil {
+		c.Error(err)
+		return
+	}
+
+	// If user changes the congregation, role shouldn't be more than 'public'.
 	o := orm.NewOrm()
 	core.TransBegin(o)
-	user.Password = string(hashedBytes[:])
-	err = core.UpdateModel(o, user, []string{"password", "phone", "role"})
+	if !user.Congregation.AdminExists(o) {
+		user.Role = "admin"
+	} else if existingUser.Congregation.ID != user.Congregation.ID {
+		user.Role = "public"
+	}
+
+	err = core.UpdateModel(o, user, []string{"congregation_id", "nickname", "password", "phone", "role"})
 	if err != nil {
 		core.TransRollback(o)
 		c.Error(err)
 		return
 	}
-
-	if !core.GetModelQuerySeter(o, new(models.User), true).
-		Filter("congregation__id", user.Congregation.ID).
-		Filter("role", "admin").
-		Exist() {
+	if !user.Congregation.AdminExists(o) {
 		core.TransRollback(o)
 		c.Error(errors.New("ERROR_NEEDS_ADMIN"))
 		return

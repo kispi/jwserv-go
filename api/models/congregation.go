@@ -1,6 +1,7 @@
 package models
 
 import (
+	"../core"
 	"github.com/astaxie/beego/orm"
 )
 
@@ -19,4 +20,11 @@ func (t *Congregation) TableName() string {
 
 func init() {
 	orm.RegisterModel(new(Congregation))
+}
+
+// AdminExists returns if admin exists for that congregation.
+func (t *Congregation) AdminExists(o orm.Ormer) bool {
+	return core.GetModelQuerySeter(o, new(User), false).
+		Filter("role", "admin").
+		Filter("congregation_id", t.ID).Exist()
 }
