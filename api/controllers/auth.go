@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"errors"
+	"strings"
 	"time"
 
 	"../core"
@@ -23,6 +24,15 @@ func (c *AuthController) SignIn() {
 	}
 	email, _ := json.Get("email").String()
 	password, _ := json.Get("password").String()
+
+	if !strings.Contains(email, "@") {
+		user, err := models.GetUserByNickname(email)
+		if err != nil {
+			c.Error(errors.New("NON_EXIST_USER"))
+			return
+		}
+		email = user.Email
+	}
 	c.signInLocal(email, password)
 }
 

@@ -23,15 +23,16 @@ func (c *ExportController) ExportServiceRecords() {
 		return
 	}
 
-	all := c.GetURLQueryParam("all")
-	start := c.GetURLQueryParam("start")
-	end := c.GetURLQueryParam("end")
+	from := c.GetURLQueryParam("from")
+	to := c.GetURLQueryParam("to")
 	exportType := c.GetURLQueryParam("exportType")
-	core.Log.Debug(all, start, end, exportType)
+	core.Log.Debug(from, to, exportType)
 
 	serviceRecords := []*models.ServiceRecord{}
 	core.GetModelQuerySeter(nil, new(models.ServiceRecord), false).
 		Filter("congregation__id", user.Congregation.ID).
+		Filter("started_at__gte", from).
+		Filter("started_at__lte", to).
 		Limit(-1).
 		All(&serviceRecords)
 

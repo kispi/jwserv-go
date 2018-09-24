@@ -30,6 +30,7 @@ func init() {
 	orm.RegisterModel(new(User))
 }
 
+// LoadCongregation loads congregation
 func (t *User) LoadCongregation() {
 	o := orm.NewOrm()
 	o.LoadRelated(t, "Congregation", 0)
@@ -54,4 +55,14 @@ func (t *User) RenewAuthToken() (*AuthToken, error) {
 		}
 	}
 	return authToken, nil
+}
+
+// GetUserByNickname returns user by nickname
+func GetUserByNickname(email string) (*User, error) {
+	user := new(User)
+	err := core.GetModelQuerySeter(nil, user, false).Filter("nickname", email).One(user)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
 }
