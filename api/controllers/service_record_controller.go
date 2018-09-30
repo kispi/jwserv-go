@@ -28,7 +28,7 @@ func (c *ServiceRecordController) Get() {
 	qs := core.GetModelQuerySeter(nil, new(models.ServiceRecord), true)
 	qs = qs.Filter("congregation_id", user.Congregation.ID)
 	qs, _, subLimit, _ := c.SetQuerySeterByURIParam(qs)
-	qs.All(&serviceRecords)
+	qs.OrderBy("-startedAt", "-area").All(&serviceRecords)
 
 	c.Success(subLimit, serviceRecords)
 }
