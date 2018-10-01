@@ -7,6 +7,7 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+	"time"
 
 	"../constants"
 	"../helpers"
@@ -29,6 +30,8 @@ type Controller struct {
 
 // Success Success
 func (c *Controller) Success(total int64, data interface{}) {
+	time_now := time.Now()
+	Log.Infof("%s %s %d %v", c.Ctx.Request.Method, c.Ctx.Request.RequestURI, 200, (time.Now().Sub(time_now)).String())
 	c.Ctx.Output.SetStatus(200)
 	c.Data["json"] = Response{total, data}
 	c.ServeJSON()
@@ -36,6 +39,8 @@ func (c *Controller) Success(total int64, data interface{}) {
 
 // Failed Failed
 func (c *Controller) Error(err error) {
+	time_now := time.Now()
+	Log.Infof("%s %s %d %v", c.Ctx.Request.Method, c.Ctx.Request.RequestURI, 500, (time.Now().Sub(time_now)).String())
 	Log.Error(err)
 	c.Ctx.ResponseWriter.WriteHeader(500)
 	c.Ctx.ResponseWriter.Write([]byte(err.Error()))
