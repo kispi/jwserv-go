@@ -182,6 +182,11 @@ func (c *ServiceRecordController) Put() {
 		return
 	}
 
+	if c.existsOnSameDate(serviceRecord) {
+		c.Error(errors.New("RECORD_ALREADY_EXISTS"))
+		return
+	}
+
 	err = c.PutModel(nil, serviceRecord)
 	if err != nil {
 		c.Error(err)
