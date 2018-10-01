@@ -148,7 +148,7 @@ func (c *ServiceRecordController) GetWithDayName() {
 			ids = append(ids, r.ID)
 		}
 		qs := core.GetModelQuerySeter(nil, new(models.ServiceRecord), true).Filter("id__in", ids)
-		qs, fields, subTotal, _ := c.SetQuerySeterByURIParams(qs)
+		qs, fields, subTotal, _ := c.SetQuerySeterByURIParam(qs)
 		total, err := qs.OrderBy("-startedAt", "-area").All(&serviceRecords)
 		if err != nil || total == 0 {
 			serviceRecords = []*models.ServiceRecord{}
