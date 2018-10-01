@@ -23,9 +23,9 @@ func (c *ExportController) ExportServiceRecords() {
 		return
 	}
 
-	from := c.GetURLQueryParam("from")
-	to := c.GetURLQueryParam("to")
-	exportType := c.GetURLQueryParam("exportType")
+	from := c.GetQueryValue("from")
+	to := c.GetQueryValue("to")
+	exportType := c.GetQueryValue("exportType")
 	core.Log.Debug(from, to, exportType)
 
 	serviceRecords := []*models.ServiceRecord{}

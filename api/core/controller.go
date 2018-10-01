@@ -59,8 +59,8 @@ func (c *Controller) ParseJSONBody() (json *simplejson.Json, err error) {
 	return json, nil
 }
 
-// GetURLQueryParam GetURLQueryParam
-func (c *Controller) GetURLQueryParam(key string) string {
+// GetQueryValue GetQueryValue
+func (c *Controller) GetQueryValue(key string) string {
 	return c.Ctx.Request.URL.Query().Get(key)
 }
 
