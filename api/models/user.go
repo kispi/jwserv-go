@@ -58,9 +58,9 @@ func (t *User) RenewAuthToken() (*AuthToken, error) {
 }
 
 // GetUserByNickname returns user by nickname
-func GetUserByNickname(email string) (*User, error) {
+func GetUserByNickname(nickname string) (*User, error) {
 	user := new(User)
-	err := core.GetModelQuerySeter(nil, user, false).Filter("nickname", email).One(user)
+	err := core.GetModelQuerySeter(nil, user, false).Filter("nickname", nickname).One(user)
 	if err != nil {
 		return nil, err
 	}
