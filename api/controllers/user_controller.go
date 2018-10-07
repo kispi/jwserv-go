@@ -22,6 +22,7 @@ func (c *UserController) Me() {
 		c.Error(err)
 		return
 	}
+	user.Password = ""
 	c.Success(1, user)
 }
 
