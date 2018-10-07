@@ -97,7 +97,7 @@ func (c *Controller) SetQuerySeterByURIParam(qs orm.QuerySeter) (orm.QuerySeter,
 			}
 			fields[constants.Filter]++
 		case constants.OrderBy:
-			qs = qs.OrderBy(pair[1])
+			qs = qs.OrderBy(strings.Split(pair[1], ",")...)
 			fields[constants.OrderBy]++
 		case constants.GroupBy:
 			qs = qs.GroupBy(pair[1])
