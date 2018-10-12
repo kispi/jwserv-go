@@ -181,9 +181,8 @@ func (c *ServiceRecordController) Put() {
 		return
 	}
 
-	o := orm.NewOrm()
 	existing := new(models.ServiceRecord)
-	if err := core.GetModelQuerySeter(o, existing, true).
+	if err := core.GetModelQuerySeter(nil, existing, true).
 		Filter("id", serviceRecord.ID).
 		One(existing); err != nil {
 		c.Error(err)
