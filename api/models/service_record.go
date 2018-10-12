@@ -37,3 +37,24 @@ func (t *ServiceRecord) TableName() string {
 func init() {
 	orm.RegisterModel(new(ServiceRecord))
 }
+
+// NumOfRecordsInTheSameDayForTheSameArea returns the number of records in the same day for the same area. This must be 1 always.
+func (t *ServiceRecord) NumOfRecordsInTheSameDayForTheSameArea() int64 {
+	type Result struct {
+		Count int64 `json:"count"`
+	}
+	result := &Result{}
+	start := t.StartedAt.Format("2006-01-02")
+	o := orm.NewOrm()
+	q := "SELECT COUNT(*) AS count FROM service_records WHERE " +
+		"congregation_id = ? AND " +
+		"area = ? AND " +
+		"started_at >= ? AND started_at <= ? AND " +
+		"deleted_at IS NULL"
+	o.Raw(q,
+		t.Congregation.ID,
+		t.Area,
+		start+" 00:00:00", start+" 23:59:59").QueryRow(&result)
+
+	return result.Count
+}

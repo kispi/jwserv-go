@@ -65,7 +65,7 @@ func (c *ServiceRecordController) Post() {
 		return
 	}
 
-	if c.existsOnSameDate(serviceRecord) {
+	if serviceRecord.NumOfRecordsInTheSameDayForTheSameArea() > 0 {
 		c.Error(errors.New("RECORD_ALREADY_EXISTS"))
 		return
 	}
@@ -181,9 +181,20 @@ func (c *ServiceRecordController) Put() {
 		return
 	}
 
-	if c.existsOnSameDate(serviceRecord) {
-		c.Error(errors.New("RECORD_ALREADY_EXISTS"))
+	o := orm.NewOrm()
+	existing := new(models.ServiceRecord)
+	if err := core.GetModelQuerySeter(o, existing, true).
+		Filter("id", serviceRecord.ID).
+		One(existing); err != nil {
+		c.Error(err)
 		return
+	}
+
+	if existing.Area != serviceRecord.Area {
+		if serviceRecord.NumOfRecordsInTheSameDayForTheSameArea() > 0 {
+			c.Error(errors.New("RECORD_ALREADY_EXISTS"))
+			return
+		}
 	}
 
 	err = c.PutModel(nil, serviceRecord)
@@ -193,24 +204,4 @@ func (c *ServiceRecordController) Put() {
 	}
 
 	c.Success(1, "success")
-}
-
-func (c *ServiceRecordController) existsOnSameDate(serviceRecord *models.ServiceRecord) bool {
-	type Result struct {
-		Count int64 `json:"count"`
-	}
-	result := &Result{}
-	start := serviceRecord.StartedAt.Format("2006-01-02")
-	o := orm.NewOrm()
-	q := "SELECT COUNT(*) AS count FROM service_records WHERE " +
-		"congregation_id = ? AND " +
-		"area = ? AND " +
-		"started_at >= ? AND started_at <= ? AND " +
-		"deleted_at IS NULL"
-	o.Raw(q,
-		serviceRecord.Congregation.ID,
-		serviceRecord.Area,
-		start+" 00:00:00", start+" 23:59:59").QueryRow(&result)
-
-	return result.Count > 0
 }
