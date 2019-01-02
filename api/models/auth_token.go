@@ -36,7 +36,7 @@ func init() {
 
 // NewAuthToken - Create new auth token
 func NewAuthToken(user *User) *AuthToken {
-	token := uuid.NewV4().String()
+	token := uuid.Must(uuid.NewV4()).String()
 	hasher := md5.New()
 	hasher.Write([]byte(token))
 
