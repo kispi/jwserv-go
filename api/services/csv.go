@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"encoding/csv"
 	"errors"
-	"io/ioutil"
 	"os"
 
 	"../core"
@@ -44,18 +43,4 @@ func (c *CSVService) AddRows(rows [][]string) error {
 		return errors.New("FAILED_TO_ADD_ROWS")
 	}
 	return nil
-}
-
-func (c *CSVService) SaveFileAsBytes() ([]byte, error) {
-	fileAsByte, err := ioutil.ReadFile(c.FileName)
-	if err != nil {
-		return nil, errors.New("FAILED_TO_SAVE_CREATE_BYTE_STREAM")
-	}
-	c.Writer.Flush()
-
-	err = os.Remove(c.FileName)
-	if err != nil {
-		core.Log.Warning("FAILED_TO_REMOVE_TEMPORARY_FILE", c.FileName)
-	}
-	return fileAsByte, nil
 }

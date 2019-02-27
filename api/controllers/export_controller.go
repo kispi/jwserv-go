@@ -2,12 +2,16 @@ package controllers
 
 import (
 	"errors"
+	"io/ioutil"
+	"os"
 	"strings"
 	"time"
 
 	"../core"
 	"../models"
 	"../services"
+
+	"github.com/tealeg/xlsx"
 )
 
 // ExportController ExportController
@@ -46,7 +50,7 @@ func (c *ExportController) ExportServiceRecords() {
 		c.responseAsCSV(pages)
 		return
 	case "excel":
-		c.responseAsCSV(pages)
+		c.responseAsExcel(pages)
 		return
 	}
 	c.Error(errors.New("UNEXPECTED_EXPORT_TYPE"))
@@ -63,7 +67,7 @@ func (c *ExportController) responseAsCSV(pages [][][]string) {
 	for _, page := range pages {
 		csv.AddRows(page)
 	}
-	fileAsByte, err := csv.SaveFileAsBytes()
+	fileAsByte, err := saveFileAsBytes(fileName)
 	if err != nil {
 		core.Log.Error(err)
 		return
@@ -75,4 +79,52 @@ func (c *ExportController) responseAsCSV(pages [][][]string) {
 		c.Error(err)
 		return
 	}
+}
+
+func (c *ExportController) responseAsExcel(pages [][][]string) {
+	file := xlsx.NewFile()
+	sheet, err := file.AddSheet("result")
+	if err != nil {
+		c.Error(err)
+		return
+	}
+
+	for _, page := range pages {
+		for _, row := range page {
+			newRow := sheet.AddRow()
+			for _, col := range row {
+				newCell := newRow.AddCell()
+				newCell.Value = col
+			}
+		}
+	}
+	filename := "temp.xlsx"
+	file.Save(filename)
+
+	c.Ctx.ResponseWriter.Header().Set("Content-Description", "File Transfer")
+	c.Ctx.ResponseWriter.Header().Set("Content-Type", "text/csv; charset=UTF-8")
+	r, err := saveFileAsBytes(filename)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+
+	_, err = c.Ctx.ResponseWriter.Write(r)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+}
+
+func saveFileAsBytes(filename string) ([]byte, error) {
+	fileAsByte, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return nil, errors.New("FAILED_TO_SAVE_CREATE_BYTE_STREAM")
+	}
+
+	err = os.Remove(filename)
+	if err != nil {
+		core.Log.Warning("FAILED_TO_REMOVE_TEMPORARY_FILE", filename)
+	}
+	return fileAsByte, nil
 }
