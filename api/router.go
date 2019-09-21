@@ -24,6 +24,9 @@ func init() {
 		beego.NSRouter("/serviceRecords", serviceRecordController, "get:Get;post:Post"),
 		beego.NSRouter("/serviceRecords/:id", serviceRecordController, "get:GetWithDayName;put:Put;delete:Delete"),
 
+		beego.NSRouter("/serviceRecords/:id/detail", serviceRecordController, "post:PostDetail"),
+		beego.NSRouter("/serviceRecords/:id/detail/:id", serviceRecordController, "put:PutDetail;delete:DeleteDetail"),
+
 		beego.NSRouter("/congregations", congregationController, "get:Get;post:Post"),
 		beego.NSRouter("/congregations/:id", congregationController, "get:GetByID;put:Put;delete:Delete"),
 

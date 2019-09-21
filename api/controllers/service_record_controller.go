@@ -29,6 +29,8 @@ func (c *ServiceRecordController) Get() {
 	qs = qs.Filter("congregation_id", user.Congregation.ID)
 	qs, _, subLimit, _ := c.SetQuerySeterByURIParam(qs)
 	qs.All(&serviceRecords)
+
+	models.LoadRecordsDetails(serviceRecords)
 	c.Success(subLimit, serviceRecords)
 }
 
@@ -202,5 +204,62 @@ func (c *ServiceRecordController) Put() {
 		return
 	}
 
+	c.Success(1, "success")
+}
+
+// PostDetail -
+func (c *ServiceRecordController) PostDetail() {
+	user, err := c.GetAuthUser()
+	if err != nil || user.Role == "public" {
+		c.Error(err)
+		return
+	}
+
+	recordDetail := new(models.RecordDetail)
+	c.ParseJSONBodyStruct(recordDetail)
+	_, err = core.InsertModel(nil, recordDetail)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+	c.Success(1, "success")
+}
+
+// PutDetail -
+func (c *ServiceRecordController) PutDetail() {
+	user, err := c.GetAuthUser()
+	if err != nil || user.Role == "public" {
+		c.Error(err)
+		return
+	}
+
+	err = c.PutModel(nil, &models.RecordDetail{})
+	if err != nil {
+		c.Error(err)
+		return
+	}
+	c.Success(1, "success")
+}
+
+// DeleteDetail -
+func (c *ServiceRecordController) DeleteDetail() {
+	user, err := c.GetAuthUser()
+	if err != nil || user.Role == "public" {
+		c.Error(err)
+		return
+	}
+
+	idStr := c.Ctx.Input.Param(":id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+
+	_, err = core.GetModelQuerySeter(nil, &models.RecordDetail{}, false).Filter("id", id).Delete()
+	if err != nil {
+		c.Error(err)
+		return
+	}
 	c.Success(1, "success")
 }
