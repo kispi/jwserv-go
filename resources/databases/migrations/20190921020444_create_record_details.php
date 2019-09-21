@@ -7,7 +7,7 @@ class CreateRecordDetails extends AbstractMigration
     public function change() {
         $table = 'record_details';
 
-        $this->table($table)
+        $this->table($table, ['id' => false, 'primary_key' => 'id'])
             ->addColumn('id', 'biginteger', ['identity' => true])
             ->addColumn('record_id', 'biginteger')
             ->addColumn('name', 'string', ['null' => true])
