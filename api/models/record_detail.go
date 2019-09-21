@@ -9,7 +9,7 @@ import (
 type RecordDetail struct {
 	BaseModel
 
-	Record *ServiceRecord `orm:"column(record_id);" json:"record"`
+	Record *ServiceRecord `orm:"column(record_id);rel(fk);" json:"record"`
 	Name   string         `orm:"column(name);" json:"name,omitempty"`
 	Memo   string         `orm:"column(memo)" json:"memo,omitempty"`
 }
