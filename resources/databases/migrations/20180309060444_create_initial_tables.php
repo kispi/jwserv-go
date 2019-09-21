@@ -4,13 +4,6 @@ use Phinx\Migration\AbstractMigration;
 
 class CreateInitialTables extends AbstractMigration
 {
-    protected $tables = [
-        "congregations",
-        "service_records",
-        "users"
-    ];
-
-    // 'boolean', ('enum', ['values' => ['female', 'male']])
     public function change() {
         $this->table('congregations', ['id' => false, 'primary_key' => 'id'])
         ->addColumn('id', 'biginteger', ['identity' => true])
@@ -49,8 +42,8 @@ class CreateInitialTables extends AbstractMigration
         ->addColumn('leader_name', 'string', ['null' => true])
         ->addColumn('recorder_id', 'biginteger', ['null' => true])
         ->addColumn('memo', 'text', ['null' => true])
-        ->addForeignKey('congregation_id', 'congregations', 'id', array('delete' => 'SET NULL', 'update' => 'CASCADE'))
-        ->addForeignKey('recorder_id', 'users', 'id', array('delete' => 'SET NULL', 'update' => 'CASCADE'))
+        ->addForeignKey('congregation_id', 'congregations', 'id', ['delete' => 'SET NULL', 'update' => 'CASCADE'])
+        ->addForeignKey('recorder_id', 'users', 'id', ['delete' => 'SET NULL', 'update' => 'CASCADE'])
         ->save();
     }
 }
